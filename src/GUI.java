@@ -1,13 +1,26 @@
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-public class GUI extends Application{
+public class GUI extends Application implements EventHandler<ActionEvent>{
     VBox scheme = new VBox();
+    StackPane mainWindowLayout = new StackPane();
+    GridPane grid = new GridPane();
+    Button newscheme = new Button();
+    HBox titlebutton = new HBox();
+    Button edit = new Button("Edit");
+    HBox newSchemeContainer = new HBox();
+//    ContextMenu schemeOptions = new ContextMenu();
+//    MenuItem editScheme = new MenuItem();
+
 
 
 
@@ -22,7 +35,7 @@ public class GUI extends Application{
          * agregar los componentes de esta pantalla
          * @author Brayan Rodríguez
          */
-        StackPane mainWindowLayout = new StackPane();
+
         addtoMaingrid(mainWindowLayout);
 
 
@@ -52,7 +65,6 @@ public class GUI extends Application{
      * @author Brayan Rodríguez
      */
     public void addtoMaingrid(StackPane mainWindowLayout){
-        GridPane grid = new GridPane();
         grid.setHgap(8);
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
@@ -75,8 +87,10 @@ public class GUI extends Application{
 
         // Se crea un HBox para poner el título y el botón horizontalmente
         Label schemetitle = new Label("Esquemas");
-        Button newscheme = new Button("New scheme");
-        HBox titlebutton = new HBox();
+        newscheme.setText("Nuevo Esquema"); //Botón para agregar un nuevo esquema
+        newscheme.setOnAction(this);
+
+
         titlebutton.setSpacing(15);
         titlebutton.getChildren().addAll(schemetitle,newscheme);
 
@@ -88,7 +102,7 @@ public class GUI extends Application{
 
         //Ejemplo de como agregar un nuevo esquema al área destinada a mostrar los esquemas actuales
         addNewSchemeTitle(scheme, "hola");
-        addNewSchemeTitle(scheme, "hola");
+
 
 
 
@@ -104,8 +118,8 @@ public class GUI extends Application{
     }
     public void addNewSchemeTitle(VBox scheme, String name){
         Label schemetitle = new Label(name);
-        Button edit = new Button("Edit");
-        HBox newSchemeContainer = new HBox();
+        edit.setText("Edit");
+
         newSchemeContainer.setSpacing(60);
         newSchemeContainer.getChildren().addAll(schemetitle,edit);
         scheme.getChildren().addAll(newSchemeContainer);
@@ -114,4 +128,19 @@ public class GUI extends Application{
 
     }
 
+    @Override
+    /**
+     * En esta clase se manejarán las acciones por hacer de los botones
+     * @author Brayan Rodríguez Villalobos
+     */
+    public void handle(ActionEvent actionEvent) {
+        if (actionEvent.getSource()==newscheme){
+            //Abrir la ventana para crear un nuevo esquema
+            //Actualizar el espacio donde se muestran los esquemas ya hechos
+            System.out.println("Nueva pantalla");
+        }else if (actionEvent.getSource()==edit){
+
+
+        }
+    }
 }
