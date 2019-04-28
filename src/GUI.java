@@ -7,6 +7,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class GUI extends Application{
+    VBox scheme = new VBox();
 
 
 
@@ -15,11 +16,8 @@ public class GUI extends Application{
     public void start(Stage stage){
 
 
-
-
-
-
         stage.setTitle("In Memory Data Base");
+
         /**Panel de la pantalla principal, aquí se van a
          * agregar los componentes de esta pantalla
          * @author Brayan Rodríguez
@@ -67,7 +65,7 @@ public class GUI extends Application{
 
     }
     public void addtoSchemeVBox(GridPane grid){
-        VBox scheme = new VBox();
+        //Este VBox es donde se van a agregar las partes necesarias para el área destinada a los esquemas
 
         scheme.setPadding(new Insets(10,10,10,10));
         scheme.setSpacing(30);
@@ -75,7 +73,7 @@ public class GUI extends Application{
         String style = "-fx-background-color: rgba(142,255,185,0.5);";
         scheme.setStyle(style);
 
-
+        // Se crea un HBox para poner el título y el botón horizontalmente
         Label schemetitle = new Label("Esquemas");
         Button newscheme = new Button("New scheme");
         HBox titlebutton = new HBox();
@@ -83,10 +81,18 @@ public class GUI extends Application{
         titlebutton.getChildren().addAll(schemetitle,newscheme);
 
 
+
+        //Aquí se agregan los componentes al VBox
         scheme.getChildren().addAll(titlebutton);
 
 
+        //Ejemplo de como agregar un nuevo esquema al área destinada a mostrar los esquemas actuales
+        addNewSchemeTitle(scheme, "hola");
+        addNewSchemeTitle(scheme, "hola");
 
+
+
+        //Se agrega el VBox al GridPane
         grid.add(scheme,0,0);
 
 
@@ -96,6 +102,16 @@ public class GUI extends Application{
 
 
     }
+    public void addNewSchemeTitle(VBox scheme, String name){
+        Label schemetitle = new Label(name);
+        Button edit = new Button("Edit");
+        HBox newSchemeContainer = new HBox();
+        newSchemeContainer.setSpacing(60);
+        newSchemeContainer.getChildren().addAll(schemetitle,edit);
+        scheme.getChildren().addAll(newSchemeContainer);
 
+
+
+    }
 
 }
