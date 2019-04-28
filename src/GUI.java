@@ -2,10 +2,8 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class GUI extends Application{
@@ -15,6 +13,12 @@ public class GUI extends Application{
 
 
     public void start(Stage stage){
+
+
+
+
+
+
         stage.setTitle("In Memory Data Base");
         /**Panel de la pantalla principal, aquí se van a
          * agregar los componentes de esta pantalla
@@ -28,7 +32,10 @@ public class GUI extends Application{
 
 
 
-        Scene scene = new Scene(mainWindowLayout,800,600);
+        Scene scene = new Scene(mainWindowLayout,1280,900);
+        stage.setMinWidth(640);
+        stage.setMinHeight(480);
+
         stage.setScene(scene);
 
 
@@ -48,33 +55,44 @@ public class GUI extends Application{
      */
     public void addtoMaingrid(StackPane mainWindowLayout){
         GridPane grid = new GridPane();
-        grid.setHgap(5);
-        grid.setVgap(5);
-        grid.setPadding(new Insets(0, 10, 0, 10));
+        grid.setHgap(8);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(10,10,10,10));
+
 
 
         addtoSchemeVBox(grid);
+
         mainWindowLayout.getChildren().addAll(grid);
 
     }
     public void addtoSchemeVBox(GridPane grid){
-        VBox newscheme = new VBox();
-        newscheme.setPadding(new Insets(10));
-        newscheme.setSpacing(8);
-        newscheme.setBackground(Background.EMPTY);
-        //String style = "-fx-background-color: rgba(255, 0, 255, 0.5);";
-        //newscheme.setStyle(style);
+        VBox scheme = new VBox();
+
+        scheme.setPadding(new Insets(10,10,10,10));
+        scheme.setSpacing(30);
+        scheme.setBackground(Background.EMPTY);
+        String style = "-fx-background-color: rgba(142,255,185,0.5);";
+        scheme.setStyle(style);
 
 
-        //newscheme.getChildren().addAll(new Button("Nuevo Esquema"));
+        Label schemetitle = new Label("Esquemas");
+        Button newscheme = new Button("New scheme");
+        HBox titlebutton = new HBox();
+        titlebutton.setSpacing(15);
+        titlebutton.getChildren().addAll(schemetitle,newscheme);
+
+
+        scheme.getChildren().addAll(titlebutton);
+
+
+
+        grid.add(scheme,0,0);
 
 
 
 
 
-
-
-        grid.add(newscheme,1,0);
 
 
     }
