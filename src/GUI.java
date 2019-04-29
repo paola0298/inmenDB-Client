@@ -3,11 +3,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class GUI extends Application implements EventHandler<ActionEvent>{
@@ -16,10 +14,12 @@ public class GUI extends Application implements EventHandler<ActionEvent>{
     GridPane grid = new GridPane();
     Button newscheme = new Button();
     HBox titlebutton = new HBox();
-    Button edit = new Button("Edit");
-    HBox newSchemeContainer = new HBox();
-//    ContextMenu schemeOptions = new ContextMenu();
-//    MenuItem editScheme = new MenuItem();
+
+    HBox newSchemeContainer;
+
+    MenuItem editScheme = new MenuItem("Editar Esquema...");
+    MenuItem deleteScheme = new MenuItem("Eliminar Esquema");
+
 
 
 
@@ -101,7 +101,8 @@ public class GUI extends Application implements EventHandler<ActionEvent>{
 
 
         //Ejemplo de como agregar un nuevo esquema al área destinada a mostrar los esquemas actuales
-        addNewSchemeTitle(scheme, "hola");
+        addSchemeTitle(scheme, "hola");
+        addSchemeTitle(scheme, "holaw");
 
 
 
@@ -116,12 +117,20 @@ public class GUI extends Application implements EventHandler<ActionEvent>{
 
 
     }
-    public void addNewSchemeTitle(VBox scheme, String name){
+
+    public void addSchemeTitle(VBox scheme, String name) {
         Label schemetitle = new Label(name);
-        edit.setText("Edit");
+        Button edition = new Button("Editar");
+        ContextMenu edit = new ContextMenu();
+        edit.getItems().addAll(editScheme, deleteScheme);
+        edition.setContextMenu(edit);
+
+
+        //edit.setText("Edit");
+        newSchemeContainer = new HBox(schemetitle, edition);
 
         newSchemeContainer.setSpacing(60);
-        newSchemeContainer.getChildren().addAll(schemetitle,edit);
+        //newSchemeContainer.getChildren().addAll(schemetitle,edit);
         scheme.getChildren().addAll(newSchemeContainer);
 
 
@@ -138,9 +147,9 @@ public class GUI extends Application implements EventHandler<ActionEvent>{
             //Abrir la ventana para crear un nuevo esquema
             //Actualizar el espacio donde se muestran los esquemas ya hechos
             System.out.println("Nueva pantalla");
-        }else if (actionEvent.getSource()==edit){
-
-
-        }
+        }//else if (actionEvent.getSource()){
+//
+//
+//        }
     }
 }
