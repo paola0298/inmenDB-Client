@@ -64,7 +64,14 @@ public class GUI extends Application{
         // Se crea un HBox para poner el título y el botón horizontalmente
         Label schemetitle = new Label("Esquemas");
         newscheme.setText("Nuevo Esquema"); //Botón para agregar un nuevo esquema
-//        newscheme.setOnAction(this);
+        newscheme.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                //Aquí se van a agregar las funcionalidades del botón para crear un nuevo esquema
+                //Se debe accesar a la pantalla de crear un nuevo esquema
+                System.out.println("Nuevo esquema");
+            }
+        });
 
 
         titlebutton.setSpacing(15);
