@@ -16,6 +16,9 @@ public class GUI extends Application{
     private Button newscheme = new Button();
     private HBox titlebutton = new HBox();
     private HBox newSchemeContainer;
+    public ScrollPane schemeArea = new ScrollPane();
+    private ScrollPane dataArea = new ScrollPane();
+    private ScrollPane indexArea = new ScrollPane();
 
 
 
@@ -49,6 +52,8 @@ public class GUI extends Application{
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
         addtoSchemeVBox(grid);
+        //La siguiente llamada se debe hacer desde otro método para que reciba la información del esquema por visualizar
+        addVisualizationDataSpace(grid, "Persona");
         mainWindowLayout.getChildren().addAll(grid);
 
     }
@@ -86,8 +91,11 @@ public class GUI extends Application{
         addSchemeTitle(scheme, "hola");
         addSchemeTitle(scheme, "holaw");
 
-        //Se agrega el VBox al GridPane
-        grid.add(scheme,0,0);
+
+        schemeArea.setContent(scheme);
+        schemeArea.setPannable(true);
+        //Se agrega el ScrollPane al GridPane
+        grid.add(schemeArea, 0, 0);
     }
 
     public void addSchemeTitle(VBox scheme, String name) {
@@ -112,30 +120,47 @@ public class GUI extends Application{
         edition.setContextMenu(edit);
 
 
-        //edit.setText("Edit");
+
         newSchemeContainer = new HBox(schemetitle, edition);
 
         newSchemeContainer.setSpacing(60);
-        //newSchemeContainer.getChildren().addAll(schemetitle,edit);
+
         scheme.getChildren().addAll(newSchemeContainer);
 
 
 
     }
 
-//    @Override
-//    /**
-//     * En esta clase se manejarán las acciones por hacer de los botones
-//     * @author Brayan Rodríguez Villalobos
-//     */
-//    public void handle(ActionEvent actionEvent) {
-//        if (actionEvent.getSource()==newscheme){
-//            //Abrir la ventana para crear un nuevo esquema
-//            //Actualizar el espacio donde se muestran los esquemas ya hechos
-//            System.out.println("Nueva pantalla");
-//        }//else if (actionEvent.getSource()){
-////
-////
-////        }
-//    }
+    public void addVisualizationDataSpace(GridPane grid, String schemeName) { //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y actualizar valores de ese esquema
+        VBox mainSpace = new VBox();
+        mainSpace.setPadding(new Insets(10, 10, 10, 10));
+        mainSpace.setBackground(Background.EMPTY);
+        String style = "-fx-background-color: rgba(255,233,105,0.54);";
+        mainSpace.setStyle(style);
+
+        Label title = new Label(schemeName);
+        Button addData = new Button("Añadir Dato...");
+        addData.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Añadir dato");
+                addSchemeTitle(mainSpace, "Persona1");
+
+            }
+        });
+
+        HBox titleData = new HBox();
+        titleData.setSpacing(800);
+        titleData.getChildren().addAll(title, addData);
+
+        mainSpace.getChildren().addAll(titleData);
+        dataArea.setContent(mainSpace);
+        dataArea.setPannable(true);
+        //Prueba de como insertar con el formato gridName.add(widget,column,row,columnspan,rowspan)
+        grid.add(dataArea, 1, 0, 40, 20);
+
+
+    }
+
+
 }
