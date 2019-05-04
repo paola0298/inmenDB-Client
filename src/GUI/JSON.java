@@ -10,14 +10,14 @@ public class JSON {
         Gson gson = new Gson();
         JSONNewRegister parseData = gson.fromJson(data, JSONNewRegister.class);
         String a[]=parseData.getAttr_name();
-        int count = 0;
-        NewRegister ventana = new NewRegister();
-
-        for (int i=0;i<a.length;i++){
-            System.out.println(a[i]);
-            count++;
-            ventana.createLabel(a[i]);
-        }
+//        NewRegister ventana = new NewRegister();
+//        ventana.setInfoEnviar(a);
+//        System.out.println(ventana.getInfoEnviar()[0]);
+//        ventana.actualiceNewRegister();
+//        for (int i=0;i<a.length;i++){
+//            System.out.println(a[i]);
+////            ventana.createLabel(a[i]);
+//        }
 
     }
 }

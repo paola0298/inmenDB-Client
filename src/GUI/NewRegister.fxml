@@ -21,39 +21,39 @@
         <content>
           <AnchorPane id="anchorPaneRegister" fx:id="anchorPaneRegister" minHeight="0.0" minWidth="0.0" prefHeight="350.0" prefWidth="543.0" style="-fx-background-color: white;" styleClass="anchorPaneNewRegister">
                <children>
-                  <SplitPane id="splitPaneRegister" fx:id="splitPaneRegister" dividerPositions="0.321011673151751" layoutX="-2.0" prefHeight="328.0" prefWidth="516.0">
+                  <SplitPane id="splitPaneRegister" fx:id="splitPaneRegister" layoutX="-2.0" prefHeight="328.0" prefWidth="516.0">
                      <items>
-                        <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #AFEEEE;" />
-                        <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #AFEEEE;">
+                        <Pane fx:id="textLabelPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #AFEEEE;">
                            <children>
-                              <TextField fx:id="nameTextFIeld" layoutX="160.0" layoutY="26.0">
+                              <TextField fx:id="nameTextFIeld" layoutX="160.0" layoutY="117.0">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </TextField>
-                              <TextField fx:id="sizeTextField" layoutX="157.0" layoutY="91.0" />
-                              <TextField fx:id="typeTextField" layoutX="157.0" layoutY="163.0" />
-                              <TextField fx:id="primaryKeyTextFIeld" layoutX="157.0" layoutY="237.0" />
-                              <Label layoutX="42.0" layoutY="31.0" text="Name">
+                              <TextField fx:id="sizeTextField" layoutX="157.0" layoutY="163.0" />
+                              <TextField fx:id="typeTextField" layoutX="157.0" layoutY="210.0" />
+                              <TextField fx:id="primaryKeyTextFIeld" layoutX="157.0" layoutY="263.0" />
+                              <Label layoutX="42.0" layoutY="117.0" text="Name">
                                  <font>
                                     <Font name="Tlwg Typewriter Bold" size="18.0" />
                                  </font>
                               </Label>
-                              <Label layoutX="14.0" layoutY="238.0" text="Primary Key">
+                              <Label layoutX="26.0" layoutY="263.0" text="Primary Key">
                                  <font>
                                     <Font name="Tlwg Typist Bold" size="18.0" />
                                  </font>
                               </Label>
-                              <Label layoutX="42.0" layoutY="168.0" text="Type">
+                              <Label layoutX="42.0" layoutY="210.0" text="Type">
                                  <font>
                                     <Font name="Tlwg Typist Bold" size="18.0" />
                                  </font>
                               </Label>
-                              <Label layoutX="42.0" layoutY="96.0" text="Size">
+                              <Label layoutX="42.0" layoutY="163.0" text="Size">
                                  <font>
-                                    <Font name="Tlwg Typist Bold" size="18.0" />
+                                    <Font name="Tlwg Typo Bold" size="18.0" />
                                  </font>
                               </Label>
+                              <Label fx:id="labelAtribute" layoutX="206.0" layoutY="24.0" prefHeight="23.0" prefWidth="72.0" style="-fx-background-color: white;" textAlignment="CENTER" />
                            </children>
                         </Pane>
                      </items>
