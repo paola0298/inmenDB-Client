@@ -54,11 +54,17 @@ public class GUI extends Application{
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
         addtoSchemeVBox(grid);
-        //La siguiente llamada se debe hacer desde otro método para que reciba la información del esquema por visualizar
-        addVisualizationDataSpace(grid, "Persona");
         mainWindowLayout.getChildren().addAll(grid);
 
     }
+
+    /**
+     * En este método se maneja el cuadro donde se muestran los esquemas actuales,
+     * se puede accesar a la pantalla para construir un nuevo esquema
+     *
+     * @param grid
+     * @author Brayan Rodríguez
+     */
     public void addtoSchemeVBox(GridPane grid){
         //Este VBox es donde se van a agregar las partes necesarias para el área destinada a los esquemas
 
@@ -83,31 +89,39 @@ public class GUI extends Application{
 
         titlebutton.setSpacing(15);
         titlebutton.getChildren().addAll(schemetitle,newscheme);
-
-
-
         //Aquí se agregan los componentes al VBox
         scheme.getChildren().addAll(titlebutton);
-
         //Ejemplo de como agregar un nuevo esquema al área destinada a mostrar los esquemas actuales
         addSchemeTitle(scheme, "hola");
         addSchemeTitle(scheme, "holaw");
-
-
         schemeArea.setContent(scheme);
         schemeArea.setPannable(true);
         //Se agrega el ScrollPane al GridPane
         grid.add(schemeArea, 0, 0);
     }
 
+    /**
+     * Este método se llama cuando se desea agregar un nuevo esquema, se va a llamar como <addSchemeTitle(scheme, "nombre del esquema");>"
+     * @param scheme
+     * @param name
+     */
     public void addSchemeTitle(VBox scheme, String name) {
         Label schemetitle = new Label(name);
         Button edition = new Button("Editar");
         ContextMenu edit = new ContextMenu();
+        MenuItem showScheme = new MenuItem("Mostrar datos...");
+        showScheme.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                addVisualizationDataSpace(grid, name);
+            }
+        });
+
         MenuItem editScheme = new MenuItem("Editar Esquema...");
         editScheme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                //Aquí se debe llamar a la pantalla para editar los esquemas
                 System.out.println("Editar un esquema");
             }
         });
@@ -115,12 +129,12 @@ public class GUI extends Application{
         deleteScheme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                //Aquí se agrega al método para eliminar esquemas
                 System.out.println("Eliminar un esquema");
             }
         });
-        edit.getItems().addAll(editScheme, deleteScheme);
+        edit.getItems().addAll(showScheme, editScheme, deleteScheme);
         edition.setContextMenu(edit);
-
 
 
         newSchemeContainer = new HBox(schemetitle, edition);
@@ -130,9 +144,14 @@ public class GUI extends Application{
         scheme.getChildren().addAll(newSchemeContainer);
 
 
-
     }
 
+    /**
+     * FALTAN MODIFICACIONES
+     * Este método funciona para visualizar los datos de un esquema específico
+     * @param grid
+     * @param schemeName
+     */
     public void addVisualizationDataSpace(GridPane grid, String schemeName) { //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y actualizar valores de ese esquema
         VBox mainSpace = new VBox();
         mainSpace.setPadding(new Insets(10, 10, 10, 10));
