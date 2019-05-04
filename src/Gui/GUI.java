@@ -279,7 +279,9 @@ public class GUI extends Application{
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
         addtoSchemeVBox(grid);
+
         addIndexSpace(grid);
+
         mainWindowLayout.getChildren().addAll(grid);
 
     }
@@ -341,7 +343,6 @@ public class GUI extends Application{
             public void handle(ActionEvent actionEvent) {
                 addVisualizationDataSpace(grid, name);
 
-
             }
         });
 
@@ -370,8 +371,6 @@ public class GUI extends Application{
         newSchemeContainer.setSpacing(60);
 
         scheme.getChildren().addAll(newSchemeContainer);
-
-
     }
 
     public void addIndexSpace(GridPane grid) {
