@@ -52,6 +52,7 @@ public class GUI extends Application{
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
         addtoSchemeVBox(grid);
+        addIndexSpace(grid);
         mainWindowLayout.getChildren().addAll(grid);
 
     }
@@ -163,7 +164,7 @@ public class GUI extends Application{
             @Override
             public void handle(ActionEvent actionEvent) {
                 System.out.println("Añadir dato");
-                addSchemeTitle(mainSpace, "Persona1");
+                addSchemeTitle(mainSpace, "Persona1");//Editar por un método que añada un dato ***
 
             }
         });
@@ -181,5 +182,68 @@ public class GUI extends Application{
 
     }
 
+    public void addIndexSpace(GridPane grid) {
+        VBox index = new VBox();
+        index.setPadding(new Insets(10, 10, 10, 10));
+        index.setSpacing(30);
+        index.setBackground(Background.EMPTY);
+        String style = "-fx-background-color: rgba(89,122,255,0.5);";
+        index.setStyle(style);
 
+        HBox title = new HBox();
+        title.setSpacing(30);
+        Label indextitle = new Label("Índices");
+        Button addIndex = new Button("Nuevo Índice...");
+        addIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Añadir índice...");
+                //Se debe hacer este llamado cuando se termine de la pantalla para crear el índice
+                addIndexTitle(index, "arbol");
+
+
+            }
+        });
+        title.getChildren().addAll(indextitle, addIndex);
+
+        index.getChildren().addAll(title);
+
+
+        indexArea.setContent(index);
+
+
+        grid.add(indexArea, 0, 1);
+
+
+    }
+
+    public void addIndexTitle(VBox index, String name) {
+        HBox indextitle = new HBox();
+        indextitle.setSpacing(30);
+        Label title = new Label(name);
+        ContextMenu indexMenu = new ContextMenu();
+        Button edit = new Button("Editar");
+        edit.setContextMenu(indexMenu);
+        MenuItem editIndex = new MenuItem("Editar Índice...");
+        editIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Editar índice");
+            }
+        });
+        MenuItem deleteIndex = new MenuItem("Eliminar Índice");
+        deleteIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Se elimina el índice");
+            }
+        });
+
+
+        indexMenu.getItems().addAll(editIndex, deleteIndex);
+        indextitle.getChildren().addAll(title, edit);
+        index.getChildren().addAll(indextitle);
+
+
+    }
 }
