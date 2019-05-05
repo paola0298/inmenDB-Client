@@ -2,6 +2,9 @@ package GUI;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -13,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 public class NewRegister  extends Pane {
+    ObservableList<String> typeList = FXCollections.observableArrayList("String","Int","Join","Double", "Float");
 
     private String []infoEnviar;
 
@@ -50,6 +54,8 @@ public class NewRegister  extends Pane {
     private TextField primaryKeyTextFIeld;
 
     private int actualValueArray;
+    @FXML
+    private ComboBox typeComboBox;
 
 
 
@@ -176,6 +182,10 @@ public class NewRegister  extends Pane {
 
     @FXML
     void initialize() {
+        typeComboBox.setValue("Elija el tipo del atributo");
+        typeComboBox.setItems(typeList);
+
 
     }
+
 }
