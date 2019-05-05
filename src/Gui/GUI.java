@@ -449,7 +449,6 @@ public class GUI extends Application{
         Label title = new Label(schemeName);
         Button addData = new Button("Añadir Dato...");
 
-
         addData.setOnAction(actionEvent -> {
             System.out.println("Añadir dato");
             mainSpace.getChildren().add(setGridData());
