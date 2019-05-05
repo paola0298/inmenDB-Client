@@ -9,15 +9,15 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="392.0" prefWidth="421.0" style="-fx-background-color: #222831;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.NewRegister">
+<Pane maxHeight="392.0" maxWidth="421.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="392.0" prefWidth="421.0" style="-fx-background-color: #222831;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.NewRegister">
    <children>
-      <TextField fx:id="nameTextFIeld" layoutX="201.0" layoutY="111.0">
+      <TextField fx:id="nameTextFIeld" layoutX="197.0" layoutY="112.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el nombre del atributo">
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
       </TextField>
-      <TextField fx:id="sizeTextField" layoutX="198.0" layoutY="171.0" />
-      <TextField fx:id="primaryKeyTextFIeld" layoutX="198.0" layoutY="283.0" />
+      <TextField fx:id="sizeTextField" layoutX="198.0" layoutY="171.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el tamaño del atributo" />
+      <TextField fx:id="primaryKeyTextFIeld" layoutX="198.0" layoutY="283.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el ID " />
       <Label layoutX="74.0" layoutY="112.0" style="-fx-text-fill: #00adb5;" text="Name">
          <font>
             <Font name="Tlwg Typewriter Bold" size="18.0" />
