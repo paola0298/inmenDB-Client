@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="392.0" maxWidth="421.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="392.0" prefWidth="421.0" style="-fx-background-color: #222831;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.NewRegister">
+<Pane style="-fx-background-color: #222831;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.NewRegister">
    <children>
       <TextField fx:id="nameTextFIeld" layoutX="197.0" layoutY="112.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el nombre del atributo">
          <padding>
@@ -17,33 +17,30 @@
          </padding>
       </TextField>
       <TextField fx:id="sizeTextField" layoutX="198.0" layoutY="171.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el tamaño del atributo" />
-      <TextField fx:id="primaryKeyTextFIeld" layoutX="198.0" layoutY="283.0" prefHeight="26.0" prefWidth="224.0" promptText="Ingrese el ID " />
-      <Label layoutX="74.0" layoutY="112.0" style="-fx-text-fill: #00adb5;" text="Name">
+      <Label layoutX="74.0" layoutY="112.0" style="-fx-text-fill: #00adb5;" text="Nombre">
          <font>
             <Font name="Tlwg Typewriter Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="36.0" layoutY="284.0" style="-fx-text-fill: #00adb5;" text="Primary Key">
+      <Label layoutX="74.0" layoutY="229.0" style="-fx-text-fill: #00adb5;" text="Tipo">
          <font>
             <Font name="Tlwg Typist Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="74.0" layoutY="229.0" style="-fx-text-fill: #00adb5;" text="Type">
-         <font>
-            <Font name="Tlwg Typist Bold" size="18.0" />
-         </font>
-      </Label>
-      <Label fx:id="labelAtribute" layoutX="169.0" layoutY="31.0" prefHeight="32.0" prefWidth="103.0" style="-fx-background-color: #222831; -fx-border-color: #00adb5; -fx-text-fill: white;" textAlignment="CENTER">
+      <Label fx:id="labelAtribute" alignment="CENTER" layoutX="114.0" layoutY="28.0" prefHeight="32.0" prefWidth="194.0" style="-fx-background-color: #222831; -fx-border-color: #00adb5; -fx-text-fill: white;" textAlignment="CENTER">
          <effect>
             <Blend />
          </effect>
+         <font>
+            <Font name="DejaVu Serif Bold" size="13.0" />
+         </font>
       </Label>
-      <Label layoutX="74.0" layoutY="171.0" style="-fx-text-fill: #00adb5;" text="Size">
+      <Label layoutX="74.0" layoutY="171.0" style="-fx-text-fill: #00adb5;" text="Tamaño">
          <font>
             <Font name="Tlwg Typo Bold" size="18.0" />
          </font>
       </Label>
-      <Button id="buttonEnter" fx:id="buttonEnter" layoutX="335.0" layoutY="346.0" mnemonicParsing="false" onAction="#boton" style="-fx-background-color: #eeeeee; -fx-text-fill: #00adb5;" text="Enter" textAlignment="CENTER">
+      <Button id="buttonEnter" fx:id="buttonEnter" layoutX="315.0" layoutY="269.0" mnemonicParsing="false" onAction="#boton" style="-fx-background-color: #eeeeee; -fx-text-fill: #00adb5;" text="Guardar" textAlignment="CENTER">
          <font>
             <Font name="Serif Bold" size="16.0" />
          </font>

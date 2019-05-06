@@ -50,9 +50,6 @@ public class NewRegister  extends Pane {
     @FXML
     private TextField typeTextField;
 
-    @FXML
-    private TextField primaryKeyTextFIeld;
-
     private int actualValueArray;
     @FXML
     private ComboBox typeComboBox;
@@ -131,13 +128,6 @@ public class NewRegister  extends Pane {
         this.typeTextField = typeTextField;
     }
 
-    public TextField getPrimaryKeyTextFIeld() {
-        return primaryKeyTextFIeld;
-    }
-
-    public void setPrimaryKeyTextFIeld(TextField primaryKeyTextFIeld) {
-        this.primaryKeyTextFIeld = primaryKeyTextFIeld;
-    }
 //    @FXML
 //    public void createLabel(String setText){
 //        Label labelCreated = new Label("setText");

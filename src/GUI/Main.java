@@ -35,7 +35,7 @@ public class Main extends Application {
         String[] dynamicLabelArray = {"Name","Last Name","ID Number"};
         NewRegisterWindow.setInfoEnviar(dynamicLabelArray);
         primaryStage.setTitle("Create New Register");
-        primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.setScene(new Scene(root, 430, 360));
         primaryStage.show();
 
     }
