@@ -15,7 +15,10 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import javax.swing.*;
 import java.awt.*;
+
+import static javafx.application.Application.launch;
 
 
 public class NewData {
@@ -23,8 +26,8 @@ public class NewData {
     public void start(Stage stage,String []arrayLabel ) {
         StackPane root = new StackPane();
         GridPane grid = new GridPane();
+        grid.setBackground();
         int posX = 0;
-        int posY = 0;
         for(int i=0; arrayLabel.length > i; i++){
             System.out.println(arrayLabel[i]);
             Label label1 = new Label();
@@ -48,8 +51,6 @@ public class NewData {
         stage.setScene(windowNewData);
         stage.show();
 
-
-
-
     }
+
 }

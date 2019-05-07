@@ -30,6 +30,9 @@ public class Main extends Application {
         NewData window= new NewData();
         window.start(primaryStage, prueba.recive_data(stringPrueba).getAttr_name());
 
+
+
+
     }
 }
 
