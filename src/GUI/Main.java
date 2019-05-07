@@ -15,11 +15,6 @@ public class Main extends Application {
 
     public static void main(String[] args) {
 
-        String stringPrueba;
-        stringPrueba=JOptionPane.showInputDialog(null,"inserte json");
-        JSON prueba = new JSON();
-        prueba.recive_data(stringPrueba);
-
         launch(args);
 
         System.out.println("termine");
@@ -28,15 +23,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage)throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        Parent root = fxmlLoader.load(getClass().getResource("NewRegister.fxml").openStream());
 
-        NewRegister NewRegisterWindow = (NewRegister)fxmlLoader.getController();
-        String[] dynamicLabelArray = {"Name","Last Name","ID Number"};
-        NewRegisterWindow.setInfoEnviar(dynamicLabelArray);
-        primaryStage.setTitle("Create New Register");
-        primaryStage.setScene(new Scene(root, 430, 360));
-        primaryStage.show();
+        String stringPrueba;
+        stringPrueba=JOptionPane.showInputDialog(null,"inserte json");
+        JSON prueba = new JSON();
+        NewData window= new NewData();
+        window.start(primaryStage, prueba.recive_data(stringPrueba).getAttr_name());
+
+
+
 
     }
 }
