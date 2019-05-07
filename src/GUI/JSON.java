@@ -11,13 +11,6 @@ public class JSON {
         JSONNewRegister parseData = gson.fromJson(data, JSONNewRegister.class);
         String a[]=parseData.getAttr_name();
         return parseData;
-//        NewRegister ventana = new NewRegister();
-//        ventana.setInfoEnviar(a);
-//        System.out.println(ventana.getInfoEnviar()[0]);
-//        ventana.actualiceNewRegister();
-//        for (int i=0;i<a.length;i++){
-//            System.out.println(a[i]);
-//        }
 
     }
 }
