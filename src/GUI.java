@@ -16,6 +16,9 @@ public class GUI extends Application{
     private Button newscheme = new Button();
     private HBox titlebutton = new HBox();
     private HBox newSchemeContainer;
+    public ScrollPane schemeArea = new ScrollPane();
+    private ScrollPane dataArea = new ScrollPane();
+    private ScrollPane indexArea = new ScrollPane();
 
 
 
@@ -49,9 +52,18 @@ public class GUI extends Application{
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
         addtoSchemeVBox(grid);
+        addIndexSpace(grid);
         mainWindowLayout.getChildren().addAll(grid);
 
     }
+
+    /**
+     * En este método se maneja el cuadro donde se muestran los esquemas actuales,
+     * se puede accesar a la pantalla para construir un nuevo esquema
+     *
+     * @param grid
+     * @author Brayan Rodríguez
+     */
     public void addtoSchemeVBox(GridPane grid){
         //Este VBox es donde se van a agregar las partes necesarias para el área destinada a los esquemas
 
@@ -64,33 +76,51 @@ public class GUI extends Application{
         // Se crea un HBox para poner el título y el botón horizontalmente
         Label schemetitle = new Label("Esquemas");
         newscheme.setText("Nuevo Esquema"); //Botón para agregar un nuevo esquema
-//        newscheme.setOnAction(this);
+        newscheme.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                //Aquí se van a agregar las funcionalidades del botón para crear un nuevo esquema
+                //Se debe accesar a la pantalla de crear un nuevo esquema
+                System.out.println("Nuevo esquema");
+            }
+        });
 
 
         titlebutton.setSpacing(15);
         titlebutton.getChildren().addAll(schemetitle,newscheme);
-
-
-
         //Aquí se agregan los componentes al VBox
         scheme.getChildren().addAll(titlebutton);
-
         //Ejemplo de como agregar un nuevo esquema al área destinada a mostrar los esquemas actuales
         addSchemeTitle(scheme, "hola");
         addSchemeTitle(scheme, "holaw");
-
-        //Se agrega el VBox al GridPane
-        grid.add(scheme,0,0);
+        schemeArea.setContent(scheme);
+        schemeArea.setPannable(true);
+        //Se agrega el ScrollPane al GridPane
+        grid.add(schemeArea, 0, 0);
     }
 
+    /**
+     * Este método se llama cuando se desea agregar un nuevo esquema, se va a llamar como <addSchemeTitle(scheme, "nombre del esquema");>"
+     * @param scheme
+     * @param name
+     */
     public void addSchemeTitle(VBox scheme, String name) {
         Label schemetitle = new Label(name);
         Button edition = new Button("Editar");
         ContextMenu edit = new ContextMenu();
+        MenuItem showScheme = new MenuItem("Mostrar datos...");
+        showScheme.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                addVisualizationDataSpace(grid, name);
+            }
+        });
+
         MenuItem editScheme = new MenuItem("Editar Esquema...");
         editScheme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                //Aquí se debe llamar a la pantalla para editar los esquemas
                 System.out.println("Editar un esquema");
             }
         });
@@ -98,37 +128,122 @@ public class GUI extends Application{
         deleteScheme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                //Aquí se agrega al método para eliminar esquemas
                 System.out.println("Eliminar un esquema");
             }
         });
-        edit.getItems().addAll(editScheme, deleteScheme);
+        edit.getItems().addAll(showScheme, editScheme, deleteScheme);
         edition.setContextMenu(edit);
 
 
-        //edit.setText("Edit");
         newSchemeContainer = new HBox(schemetitle, edition);
 
         newSchemeContainer.setSpacing(60);
-        //newSchemeContainer.getChildren().addAll(schemetitle,edit);
-        scheme.getChildren().addAll(newSchemeContainer);
 
+        scheme.getChildren().addAll(newSchemeContainer);
 
 
     }
 
-//    @Override
-//    /**
-//     * En esta clase se manejarán las acciones por hacer de los botones
-//     * @author Brayan Rodríguez Villalobos
-//     */
-//    public void handle(ActionEvent actionEvent) {
-//        if (actionEvent.getSource()==newscheme){
-//            //Abrir la ventana para crear un nuevo esquema
-//            //Actualizar el espacio donde se muestran los esquemas ya hechos
-//            System.out.println("Nueva pantalla");
-//        }//else if (actionEvent.getSource()){
-////
-////
-////        }
-//    }
+    /**
+     * FALTAN MODIFICACIONES
+     * Este método funciona para visualizar los datos de un esquema específico
+     * @param grid
+     * @param schemeName
+     */
+    public void addVisualizationDataSpace(GridPane grid, String schemeName) { //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y actualizar valores de ese esquema
+        VBox mainSpace = new VBox();
+        mainSpace.setPadding(new Insets(10, 10, 10, 10));
+        mainSpace.setBackground(Background.EMPTY);
+        String style = "-fx-background-color: rgba(255,233,105,0.54);";
+        mainSpace.setStyle(style);
+
+        Label title = new Label(schemeName);
+        Button addData = new Button("Añadir Dato...");
+        addData.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Añadir dato");
+                addSchemeTitle(mainSpace, "Persona1");//Editar por un método que añada un dato ***
+
+            }
+        });
+
+        HBox titleData = new HBox();
+        titleData.setSpacing(800);
+        titleData.getChildren().addAll(title, addData);
+
+        mainSpace.getChildren().addAll(titleData);
+        dataArea.setContent(mainSpace);
+        dataArea.setPannable(true);
+        //Prueba de como insertar con el formato gridName.add(widget,column,row,columnspan,rowspan)
+        grid.add(dataArea, 1, 0, 40, 20);
+
+
+    }
+
+    public void addIndexSpace(GridPane grid) {
+        VBox index = new VBox();
+        index.setPadding(new Insets(10, 10, 10, 10));
+        index.setSpacing(30);
+        index.setBackground(Background.EMPTY);
+        String style = "-fx-background-color: rgba(89,122,255,0.5);";
+        index.setStyle(style);
+
+        HBox title = new HBox();
+        title.setSpacing(30);
+        Label indextitle = new Label("Índices");
+        Button addIndex = new Button("Nuevo Índice...");
+        addIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Añadir índice...");
+                //Se debe hacer este llamado cuando se termine de la pantalla para crear el índice
+                addIndexTitle(index, "arbol");
+
+
+            }
+        });
+        title.getChildren().addAll(indextitle, addIndex);
+
+        index.getChildren().addAll(title);
+
+
+        indexArea.setContent(index);
+
+
+        grid.add(indexArea, 0, 1);
+
+
+    }
+
+    public void addIndexTitle(VBox index, String name) {
+        HBox indextitle = new HBox();
+        indextitle.setSpacing(30);
+        Label title = new Label(name);
+        ContextMenu indexMenu = new ContextMenu();
+        Button edit = new Button("Editar");
+        edit.setContextMenu(indexMenu);
+        MenuItem editIndex = new MenuItem("Editar Índice...");
+        editIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Editar índice");
+            }
+        });
+        MenuItem deleteIndex = new MenuItem("Eliminar Índice");
+        deleteIndex.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("Se elimina el índice");
+            }
+        });
+
+
+        indexMenu.getItems().addAll(editIndex, deleteIndex);
+        indextitle.getChildren().addAll(title, edit);
+        index.getChildren().addAll(indextitle);
+
+
+    }
 }
