@@ -1,2 +1,5 @@
-public class Schemes {
+public class Scheme {
+    public void Scheme() {
+
+    }
 }
