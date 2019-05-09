@@ -3,7 +3,6 @@ package Gui;
 import Logic.Controller;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,6 +16,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -95,6 +95,7 @@ public class NewScheme extends Application {
         ContextMenu cm = new ContextMenu();
         MenuItem normalItem = new MenuItem("Normal");
         normalItem.setOnAction(actionEvent -> addAttribute(attrGrid));
+
         MenuItem joinItem = new MenuItem("Join");
         joinItem.setOnAction(actionEvent -> {
             if (!controller.getSchemesTable().isEmpty()) {
@@ -102,7 +103,6 @@ public class NewScheme extends Application {
             } else {
                 showAlert("No hay esquemas disponibles", Alert.AlertType.INFORMATION);
             }
-
         });
         cm.getItems().addAll(normalItem, joinItem);
         addButton.setOnMouseClicked(mouseEvent -> {
@@ -115,12 +115,18 @@ public class NewScheme extends Application {
         upperContainer.getChildren().addAll(namePanel, scrollPane);
 
         HBox options = new HBox();
-        HBox leftContainer = new HBox(addButton);
-        HBox.setHgrow(leftContainer, Priority.ALWAYS);
-        leftContainer.setAlignment(Pos.CENTER_LEFT);
         options.setSpacing(15);
         options.setPadding(new Insets(5));
         options.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox leftContainer = new HBox(addButton);
+        HBox.setHgrow(leftContainer, Priority.ALWAYS);
+        leftContainer.setAlignment(Pos.CENTER_LEFT);
+
+        attrGrid.add(addButton, 4, attrGrid.getRowCount());
+
+        upperContainer.getChildren().addAll(namePanel, scrollPane);
+
         Button cancel = new Button("Cancelar");
         cancel.setOnAction(actionEvent -> {
             generatedJson.put("status", "CANCELLED");
@@ -142,6 +148,7 @@ public class NewScheme extends Application {
                 showAlert("El esquema debe tener al menos un atributo", Alert.AlertType.ERROR);
             }
         });
+
         options.getChildren().addAll(leftContainer, cancel, accept);
 
         if (modifyScheme) {
@@ -150,6 +157,7 @@ public class NewScheme extends Application {
 
         mainLayout.setCenter(upperContainer);
         mainLayout.setBottom(options);
+
         Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
@@ -193,7 +201,6 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
-
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -212,11 +219,7 @@ public class NewScheme extends Application {
             primary.setSelected(true);
         }
 
-        GridPane.setHalignment(attrName, HPos.CENTER);
-        GridPane.setHalignment(attrType, HPos.CENTER);
-        GridPane.setHalignment(schemeToSelect, HPos.CENTER);
-        GridPane.setHalignment(primary, HPos.CENTER);
-
+        //TODO no mostrar el primary cuando se edita un esquema
         if (!modifyScheme) {
             ImageView delete = new ImageView(loadImg("res/images/delete.png"));
             delete.setFitWidth(25);
@@ -242,6 +245,7 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
@@ -319,7 +323,6 @@ public class NewScheme extends Application {
 
         generatedJson = new JSONObject();
         generatedJson.put("action", "createScheme");
-
 
         JSONObject scheme = new JSONObject();
         scheme.put("name", schemeNameField.getText());
@@ -406,10 +409,10 @@ public class NewScheme extends Application {
         column3.setPercentWidth(25);
         ColumnConstraints column4 = new ColumnConstraints();
         column4.setPercentWidth(20);
+
         if (!modifyScheme) {
             ColumnConstraints column5 = new ColumnConstraints();
             column5.setPercentWidth(5);
-
             pane.getColumnConstraints().addAll(column1, column2, column3, column4, column5);
         } else {
             pane.getColumnConstraints().addAll(column1, column2, column3, column4);
@@ -438,8 +441,6 @@ public class NewScheme extends Application {
         modifyScheme = true;
         editableJson = actualScheme;
         launch(NewScheme.class);
-
         return generatedJson;
     }
-
 }
