@@ -2,7 +2,6 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -17,7 +16,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,7 +48,6 @@ public class NewScheme extends Application {
     @Override
     public void start(Stage stage) {
         controller = Controller.getInstance();
-
         generatedJson = new JSONObject();
         this.primaryKeyGroup = new ToggleGroup();
 
@@ -114,13 +111,13 @@ public class NewScheme extends Application {
         addButton.setOnMouseEntered(mouseEvent -> addButton.setEffect(new DropShadow(6, Color.BLACK)));
         addButton.setOnMouseExited(mouseEvent -> addButton.setEffect(null));
 
+
         upperContainer.getChildren().addAll(namePanel, scrollPane);
 
         HBox options = new HBox();
         options.setSpacing(15);
         options.setPadding(new Insets(5));
         options.setAlignment(Pos.CENTER_RIGHT);
-
         HBox leftContainer = new HBox(addButton);
         HBox.setHgrow(leftContainer, Priority.ALWAYS);
         leftContainer.setAlignment(Pos.CENTER_LEFT);
@@ -140,6 +137,7 @@ public class NewScheme extends Application {
                         controller.sendScheme(generatedJson);
                         stage.close();
                     } else {
+
                         showAlert("Atributos con valores inválidos", Alert.AlertType.ERROR);
                     }
                 } else {
@@ -160,6 +158,7 @@ public class NewScheme extends Application {
         mainLayout.setBottom(options);
 
         Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
+
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
         stage.show();
@@ -202,6 +201,7 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -246,7 +246,6 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
-
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
@@ -308,6 +307,7 @@ public class NewScheme extends Application {
             //TODO column count -> 5
             for (int column=0; column<columnCount; column++) {
                 int index = ((row*columnCount)+column);
+
                 Node item = container.getChildren().get(index);
                 GridPane.setColumnIndex(item, column);
                 GridPane.setRowIndex(item, row);
@@ -369,6 +369,7 @@ public class NewScheme extends Application {
 
         for (int i=0; i<nameArray.length(); i++) {
             for (int j=i+1; j<nameArray.length(); j++) {
+
                 if (nameArray.getString(i).equals(nameArray.getString(j))) {
                     coincidences = true;
                 }
@@ -392,6 +393,7 @@ public class NewScheme extends Application {
      * @param relativePath Ruta relativa de la imagen.
      * @return Instancia de la imagen.
      */
+
     private Image loadImg(String relativePath) {
         String cwd = System.getProperty("user.dir");
         return new Image("file://" + cwd + "/" + relativePath);
@@ -401,6 +403,7 @@ public class NewScheme extends Application {
      * Éste método se encarga de configurar el gridpane de los atributos.
      * @param pane Gridpane principal que contiene los atributos.
      */
+
     private void setupGridpane(GridPane pane) {
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setPercentWidth(30);
