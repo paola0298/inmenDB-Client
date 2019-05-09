@@ -17,7 +17,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -202,6 +201,7 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -247,7 +247,6 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
-
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
@@ -372,6 +371,7 @@ public class NewScheme extends Application {
 
         for (int i=0; i<nameArray.length(); i++) {
             for (int j=i+1; j<nameArray.length(); j++) {
+
                 if (nameArray.getString(i).equals(nameArray.getString(j))) {
                     coincidences = true;
                 }
