@@ -427,8 +427,6 @@ public class GUI extends Application{
     }
 
     /**
-<<<<<<< HEAD
-=======
      * En este método es donde se va a crear la Tabla, se llama al método de las configuraciones y se llama al método que inserta los datos
      *
      * @return
@@ -455,12 +453,12 @@ public class GUI extends Application{
         // actualizar valores de ese esquema
 
         //En este VBox se agrega el título del esquema y la tabla para visualizar los datos
-
         VBox mainSpace = new VBox();
         mainSpace.setPadding(new Insets(10, 10, 10, 10));
         mainSpace.setBackground(Background.EMPTY);
         String style = "-fx-background-color: rgba(255,233,105,0.54);";
         mainSpace.setStyle(style);
+
 
         //Titulo del esquema y botón para agregar datos
         Label title = new Label(schemeName);
@@ -543,7 +541,6 @@ public class GUI extends Application{
 //
 //        data.getColumns().addAll(column1, column2);
 //        data.getItems().add(new Scheme());
-
         return data;
     }
 }
