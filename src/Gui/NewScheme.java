@@ -28,7 +28,7 @@ public class NewScheme extends Application {
 
     @Override
     public void start(Stage stage) {
-        this.controller = Controller.getInstance();
+        //this.controller = Controller.getInstance();
         generatedJson = new JSONObject();
         this.primaryKeyGroup = new ToggleGroup();
 
