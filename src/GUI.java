@@ -1,3 +1,4 @@
+import Connection.Client;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -7,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 
 public class GUI extends Application{
     private VBox scheme = new VBox();
@@ -19,9 +21,6 @@ public class GUI extends Application{
     public ScrollPane schemeArea = new ScrollPane();
     private ScrollPane dataArea = new ScrollPane();
     private ScrollPane indexArea = new ScrollPane();
-
-
-
 
 
     public void start(Stage stage) {
@@ -149,7 +148,6 @@ public class GUI extends Application{
     }
 
 
-
     public void addIndexSpace(GridPane grid) {
         VBox index = new VBox();
         index.setPadding(new Insets(10, 10, 10, 10));
@@ -215,19 +213,6 @@ public class GUI extends Application{
 
     }
 
-    /**
-     * En este método es donde se va a crear la Tabla, se llama al método de las configuraciones y se llama al método que inserta los datos
-     *
-     * @return
-     */
-    private TableView createTable() {
-        //Se crea la tabla para visualizar los datos
-        TableView data = new TableView();
-        setTableappearance(data);
-        addData(data);
-        return data;
-
-    }
 
     /**
      * FALTAN MODIFICACIONES
@@ -238,12 +223,14 @@ public class GUI extends Application{
      */
     public void addVisualizationDataSpace(GridPane grid, String schemeName) { //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y actualizar valores de ese esquema
 
-        //En este VBox se agrega el título del esquema y la tabla para viualizar los datos
+
+        //En este VBox se agrega el título del esquema y la tabla para visualizar los datos
         VBox mainSpace = new VBox();
         mainSpace.setPadding(new Insets(10, 10, 10, 10));
         mainSpace.setBackground(Background.EMPTY);
         String style = "-fx-background-color: rgba(255,233,105,0.54);";
         mainSpace.setStyle(style);
+
 
         //Titulo del esquema y botón para agregar datos
         Label title = new Label(schemeName);
@@ -254,8 +241,8 @@ public class GUI extends Application{
             @Override
             public void handle(ActionEvent actionEvent) {
                 System.out.println("Añadir dato");
-                mainSpace.getChildren().remove(1);
-                mainSpace.getChildren().addAll(createTable());
+                mainSpace.getChildren().add(setGridData());
+
             }
         });
 
@@ -264,7 +251,8 @@ public class GUI extends Application{
         titleData.setSpacing(800);
         titleData.getChildren().addAll(title, addData);
 
-        mainSpace.getChildren().addAll(titleData, createTable());
+        mainSpace.getChildren().add(0, titleData);//, addToGridData(grid));//, addToGridData(grid));
+        mainSpace.getChildren().add(1, setGridData());
         dataArea.setContent(mainSpace);
         dataArea.setPannable(true);
         //Prueba de como insertar con el formato gridName.add(widget,column,row,columnspan,rowspan)
@@ -273,34 +261,28 @@ public class GUI extends Application{
 
     }
 
-    /**
-     * Este método se encarga de las configuraciones de la tabla para visualizar los datos
-     *
-     * @param data
-     */
-    private void setTableappearance(TableView data) {
-        data.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        data.setPrefWidth(600);
-        data.setPrefHeight(600);
+
+    private GridPane setGridData() {
+        GridPane data = new GridPane();
+        data.setHgap(6);
+        data.setVgap(8);
+        data.setPadding(new Insets(10, 10, 10, 10));
+        data.setGridLinesVisible(true);
+        return data;
 
     }
 
-    /**
-     * Este método se va a encargar de llenar con los datos necesarios la tabla
-     *
-     * @param data
-     * @return
-     */
-    public TableView addData(TableView data) {
-        TableColumn<Button, String> column1 = new TableColumn("Boton");
-        TableColumn<Scheme, String> column2 = new TableColumn("Nombre");
-
-
-        column2.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-
-        data.getColumns().addAll(column1, column2);
-        data.getItems().add(new Scheme());
-
+    private GridPane addToGridData(GridPane data) {//, JSONObject json){
+//        int column = json.getJSONArray("attr").length();
+//        Se añaden los títulos de las columnas
+//        for (int i = 0; i <= column -1; i++){
+//            TextField title = new TextField(json.getJSONArray("atrr").getString(i));
+//            data.addColumn(i, title);
+//        }
+//        TextField buttontitle = new TextField("");
+//        data.addColumn(column, buttontitle);
+//        Button b = new Button("ve");
+//        data.add(b,1,0);
         return data;
     }
 }
