@@ -16,6 +16,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -122,8 +123,6 @@ public class NewScheme extends Application {
         HBox.setHgrow(leftContainer, Priority.ALWAYS);
         leftContainer.setAlignment(Pos.CENTER_LEFT);
 
-//        attrGrid.add(addButton, 4, attrGrid.getRowCount());
-
         Button cancel = new Button("Cancelar");
         cancel.setOnAction(actionEvent -> {
             generatedJson.put("status", "CANCELLED");
@@ -201,7 +200,6 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
-
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -246,6 +244,7 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
