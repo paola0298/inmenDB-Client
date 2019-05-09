@@ -19,6 +19,12 @@ import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * Clase que muestra la interfaz necesaria para generar un nuevo esquema, así como generar el JSONObject
+ * correspondiente.
+ * @author marlon
+ * @version 1.0
+ */
 public class NewScheme extends Application {
 
     private Controller controller;
@@ -26,6 +32,10 @@ public class NewScheme extends Application {
     private ToggleGroup primaryKeyGroup;
     private ImageView addButton;
 
+    /**
+     * Método que inicializa y configura la interfaz.
+     * @param stage Ventana de la aplicación.
+     */
     @Override
     public void start(Stage stage) {
         this.controller = Controller.getInstance();
@@ -77,7 +87,7 @@ public class NewScheme extends Application {
         MenuItem normalItem = new MenuItem("Normal");
         normalItem.setOnAction(actionEvent -> {
             attrGrid.getChildren().remove(addButton);
-            addAttribute(attrGrid, addButton);
+            addAttribute(attrGrid);
             attrGrid.add(addButton, 4, attrGrid.getRowCount());
             GridPane.setHalignment(addButton, HPos.CENTER);
         });
@@ -87,7 +97,7 @@ public class NewScheme extends Application {
             //TODO verificar si hay esquemas
             if (!controller.getSchemesTable().isEmpty()) {
                 attrGrid.getChildren().remove(addButton);
-                addJoinAttribute(attrGrid, addButton);
+                addJoinAttribute(attrGrid);
                 attrGrid.add(addButton, 4, attrGrid.getRowCount());
                 GridPane.setHalignment(addButton, HPos.CENTER);
             } else {
@@ -145,13 +155,22 @@ public class NewScheme extends Application {
         stage.show();
     }
 
+    /**
+     * Éste método se encarga de mostrar una alerta al usuario.
+     * @param message Mensaje de la alerta.
+     * @param type Tipo de alerta (Info, Error..).
+     */
     private void showAlert(String message, Alert.AlertType type) {
         Alert alert = new Alert(type, message, ButtonType.OK);
         alert.setHeaderText(null);
         alert.show();
     }
 
-    private void addJoinAttribute(GridPane container, ImageView addButton) {
+    /**
+     * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de tipo Join.
+     * @param container Gridpane principal que contiene los atributos.
+     */
+    private void addJoinAttribute(GridPane container) {
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -166,7 +185,6 @@ public class NewScheme extends Application {
             primary.setSelected(true);
         }
 
-//        ImageView delete = new ImageView(loadImg("res/images/delete.png", 24, 24));
         ImageView delete = new ImageView(loadImg("res/images/delete.png"));
         delete.setFitWidth(25);
         delete.setFitHeight(25);
@@ -177,7 +195,7 @@ public class NewScheme extends Application {
             container.getChildren().removeAll(attrName, attrType, schemeToSelect, primary, delete, addButton);
             reallocate(container, (Integer) delete.getUserData());
             container.add(addButton, 4, container.getRowCount());
-            refreshGrid(container, addButton);
+            refreshGrid(container);
         });
 
         GridPane.setHalignment(attrName, HPos.CENTER);
@@ -189,7 +207,12 @@ public class NewScheme extends Application {
         container.addRow(container.getRowCount(), attrName, attrType, schemeToSelect, primary, delete);
     }
 
-    private void addAttribute(GridPane container, ImageView addImage) {
+    /**
+     * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de los
+     * tipos convencionales.
+     * @param container Gridpane principal que contiene los atributos.
+     */
+    private void addAttribute(GridPane container) {
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
@@ -218,11 +241,11 @@ public class NewScheme extends Application {
                 }
             }
             primary.setToggleGroup(null);
-            container.getChildren().removeAll(attrName, attrType, attrSize, primary, delete, addImage);
+            container.getChildren().removeAll(attrName, attrType, attrSize, primary, delete, addButton);
             reallocate(container, (Integer) delete.getUserData());
-            container.add(addImage, 4, container.getRowCount());
+            container.add(addButton, 4, container.getRowCount());
 
-            refreshGrid(container, addImage);
+            refreshGrid(container);
         });
 
         GridPane.setHalignment(attrName, HPos.CENTER);
@@ -234,6 +257,11 @@ public class NewScheme extends Application {
         container.addRow(container.getRowCount(), attrName, attrType, attrSize, primary, delete);
     }
 
+    /**
+     * Éste método se encarga de eliminar las filas vacías dentro del gridpane contenedor de los atributos.
+     * @param container Gridpane principal que contiene los atributos.
+     * @param rowDeleted Índice de la fila que fue eliminada.
+     */
     private void reallocate(GridPane container, int rowDeleted) {
 
         int rowCount = container.getRowCount()-1;
@@ -247,7 +275,11 @@ public class NewScheme extends Application {
         }
     }
 
-    private void refreshGrid(GridPane container, ImageView addButton) {
+    /**
+     * Método encargado de refrescar el contenedor de los atributos.
+     * @param container Gridpane principal que contiene los atributos.
+     */
+    private void refreshGrid(GridPane container) {
         container.getChildren().remove(addButton);
 
         for (int row=0; row<container.getRowCount()-1; row++) {
@@ -263,6 +295,12 @@ public class NewScheme extends Application {
 
     }
 
+    /**
+     * Éste método se encarga de generar el json, el cual será enviado al servidor.
+     * @param container Gridpane principal que contiene los atributos.
+     * @param nameField Nombre del esquema a crear.
+     * @return true si el json se generó correctamente, de lo contrario devuelve false.
+     */
     private boolean createJson(GridPane container, String nameField) {
 //        System.out.println("Generating json..");
 
@@ -327,11 +365,20 @@ public class NewScheme extends Application {
         return !coincidences;
     }
 
+    /**
+     * Método encargado de cargar una imagen desde la ruta especificada.
+     * @param relativePath Ruta relativa de la imagen.
+     * @return Instancia de la imagen.
+     */
     private Image loadImg(String relativePath) {
         String cwd = System.getProperty("user.dir");
         return new Image("file://" + cwd + "/" + relativePath);
     }
 
+    /**
+     * Éste método se encarga de configurar el gridpane de los atributos.
+     * @param pane Gridpane principal que contiene los atributos.
+     */
     private void setupGridpane(GridPane pane) {
         ColumnConstraints column1 = new ColumnConstraints();
         column1.setPercentWidth(30);
@@ -355,6 +402,10 @@ public class NewScheme extends Application {
         GridPane.setVgrow(pane, Priority.ALWAYS);
     }
 
+    /**
+     * Método que muestra la ventana de creación de nuevo esquema.
+     * @return JSONObject conteniendo el esquema a crear.
+     */
     public JSONObject show() {
         launch(NewScheme.class);
         return generatedJson;
