@@ -2,7 +2,6 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -64,7 +63,6 @@ public class NewScheme extends Application {
         Label schemeNameLabel = new Label("Nombre del esquema: ");
         schemeNameField = new TextField();
         namePanel.getChildren().addAll(schemeNameLabel, schemeNameField);
-
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
@@ -113,7 +111,6 @@ public class NewScheme extends Application {
         addButton.setOnMouseEntered(mouseEvent -> addButton.setEffect(new DropShadow(6, Color.BLACK)));
         addButton.setOnMouseExited(mouseEvent -> addButton.setEffect(null));
 
-
         upperContainer.getChildren().addAll(namePanel, scrollPane);
 
         HBox options = new HBox();
@@ -123,7 +120,6 @@ public class NewScheme extends Application {
         HBox leftContainer = new HBox(addButton);
         HBox.setHgrow(leftContainer, Priority.ALWAYS);
         leftContainer.setAlignment(Pos.CENTER_LEFT);
-
         Button cancel = new Button("Cancelar");
         cancel.setOnAction(actionEvent -> {
             generatedJson.put("status", "CANCELLED");
@@ -137,7 +133,6 @@ public class NewScheme extends Application {
                         controller.sendScheme(generatedJson);
                         stage.close();
                     } else {
-
                         showAlert("Atributos con valores inválidos", Alert.AlertType.ERROR);
                     }
                 } else {
@@ -158,7 +153,6 @@ public class NewScheme extends Application {
         mainLayout.setBottom(options);
 
         Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
-
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
         stage.show();
@@ -369,7 +363,6 @@ public class NewScheme extends Application {
 
         for (int i=0; i<nameArray.length(); i++) {
             for (int j=i+1; j<nameArray.length(); j++) {
-
                 if (nameArray.getString(i).equals(nameArray.getString(j))) {
                     coincidences = true;
                 }
