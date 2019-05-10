@@ -78,53 +78,6 @@ public class Client {
 
 
     public static void main(String[] args) {
-        /*
-        Client client = new Client("192.168.100.24", 6307);
-        boolean flag = true;
-        while (flag) {
-            String msg = JOptionPane.showInputDialog(null, "Message");
-            String response = client.connect(msg);
-            if (response == null) {
-                flag = false;
-                System.out.println(1);
-            } else if (response.equals("")) {
-                flag = false;
-                System.out.println("2");
-            } else {
-                System.out.println(response);
-            }
-
-        }
-        */
-        int action = 0;
-
-        Client client = new Client("localhost", 7123);
-        JSONObject obj = new JSONObject();
-        obj.put("action", "CALL_EXPERT");
-        obj.put("player_id", "jugador1");
-        switch (action) {
-            case 0:
-                obj.put("status", "REQUESTING");
-
-                obj.put("phone", "50671766731");
-                obj.put("word", "Ratón");
-                JSONObject response = client.connect(obj);
-                System.out.println(response.toString(2));
-                break;
-            case 1:
-                while (true) {
-                    obj.put("status", "WAITING");
-                    JSONObject res = client.connect(obj);
-                    if (res.getString("status").equals("ANSWERED")) {
-                        System.out.println(res.toString(2));
-                        break;
-                    } else {
-                        System.out.println("Waiting..");
-                    }
-                }
-                break;
-        }
-
 
     }
 

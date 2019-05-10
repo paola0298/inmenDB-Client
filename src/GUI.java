@@ -1,5 +1,9 @@
 import Connection.Client;
+import Logic.Controller;
 import javafx.application.Application;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -252,7 +256,8 @@ public class GUI extends Application{
         titleData.getChildren().addAll(title, addData);
 
         mainSpace.getChildren().add(0, titleData);//, addToGridData(grid));//, addToGridData(grid));
-        mainSpace.getChildren().add(1, setGridData());
+        //mainSpace.getChildren().add(1, setGridData());
+        makeTableData(mainSpace);
         dataArea.setContent(mainSpace);
         dataArea.setPannable(true);
         //Prueba de como insertar con el formato gridName.add(widget,column,row,columnspan,rowspan)
@@ -260,6 +265,39 @@ public class GUI extends Application{
 
 
     }
+
+    public void makeTableData(VBox dataArea) {
+        TableView datatable = new TableView();
+
+        createTableDataTitles(datatable, "Nombre");
+        //addToTable(datatable,"Brayan");
+
+        dataArea.getChildren().add(datatable);
+
+
+    }
+
+    /**
+     * Este metodo deberia ser llamado en un ciclo para agregar todos los titulos
+     *
+     * @param table
+     * @param title
+     */
+    public void createTableDataTitles(TableView table, String title) {
+
+
+        TableColumn<String, Controller> title1 = new TableColumn(title);
+        title1.setCellValueFactory(new PropertyValueFactory<>(title));
+        table.getColumns().add(title1);
+
+
+    }
+
+//    public void addToTable(TableView table, String data){
+//        ObservableList entry = FXCollections.observableArrayList( );
+//        table.getItems().add(data);
+//
+//    }
 
 
     private GridPane setGridData() {
@@ -284,5 +322,9 @@ public class GUI extends Application{
 //        Button b = new Button("ve");
 //        data.add(b,1,0);
         return data;
+    }
+
+    public static void show() {
+        launch(GUI.class);
     }
 }
