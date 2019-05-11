@@ -61,14 +61,14 @@ public class ServerClientTest {
         return response;
     }
 
-    private JSONObject createScheme(String name, String join, String idJoin){
+    private JSONObject createScheme(String name, String join){
         JSONObject response = new JSONObject();
         JSONObject newScheme = new JSONObject();
         JSONArray attrName = new JSONArray();
         attrName.put("Nombre");
         attrName.put("Cedula");
         attrName.put("Edad");
-        attrName.put(idJoin);
+        attrName.put("nombre join");
         JSONArray attrType = new JSONArray();
         attrType.put("String");
         attrType.put("int");
@@ -190,7 +190,7 @@ public class ServerClientTest {
         JSONObject newScheme1 = test.createScheme("Persona");
         JSONObject newScheme2 = test.createScheme("Carro");
         JSONObject newScheme3 = test.createScheme("Profesor");
-        JSONObject newScheme4 = test.createScheme("Estudiante", "Persona", "402390083");
+        JSONObject newScheme4 = test.createScheme("Estudiante", "Persona");
 
         JSONObject response1 = client.connect(newScheme1);
         JSONObject response2 = client.connect(newScheme2);
