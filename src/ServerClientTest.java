@@ -61,24 +61,24 @@ public class ServerClientTest {
         return response;
     }
 
-    private JSONObject createScheme(String name, String join){
+    private JSONObject createScheme(String name, String join, String idJoin){
         JSONObject response = new JSONObject();
         JSONObject newScheme = new JSONObject();
         JSONArray attrName = new JSONArray();
         attrName.put("Nombre");
         attrName.put("Cedula");
         attrName.put("Edad");
-        attrName.put("Persona");
+        attrName.put(idJoin);
         JSONArray attrType = new JSONArray();
         attrType.put("String");
         attrType.put("int");
         attrType.put("int");
-        attrType.put(join);
+        attrType.put("join");
         JSONArray attrSize = new JSONArray();
         attrSize.put(20);
         attrSize.put(100);
         attrSize.put(12);
-        attrSize.put("join");
+        attrSize.put(join);
 
         newScheme.put("name", name);
         newScheme.put("attrName", attrName);
@@ -104,11 +104,11 @@ public class ServerClientTest {
 
     private JSONObject queryScheme() { return new JSONObject();}
 
-    private JSONObject insertData(String scheme) {
+    private JSONObject insertData(String scheme, String pk) {
         JSONObject response = new JSONObject();
         JSONArray attr = new JSONArray();
         attr.put("Paola");
-        attr.put("402390083");
+        attr.put(pk);
         attr.put("20");
 
         response.put("action", "insertData");
@@ -118,11 +118,11 @@ public class ServerClientTest {
         return response;
     }
 
-    private JSONObject insertData(String scheme, String join) {
+    private JSONObject insertData(String scheme, String join, String pk) {
         JSONObject response = new JSONObject();
         JSONArray attr = new JSONArray();
         attr.put("Paola");
-        attr.put("402390083");
+        attr.put(pk);
         attr.put("20");
         attr.put(join);
 
@@ -185,46 +185,40 @@ public class ServerClientTest {
     public static void main(String[] args) {
         ServerClientTest test = new ServerClientTest();
         Client client = new Client("localhost", 6307);
-        System.out.println("Creando un nuevo esquema");
-        System.out.println("Persona");
-        JSONObject newScheme = test.createScheme("Persona");
+        System.out.println("Creando nuevos esquemas...");
 
-        JSONObject response1 = client.connect(newScheme);
-//
-//        Hashtable<String, JSONObject> actualSchemes = test.deserializeSchemes(response);
-////        actualSchemes.get()
-//        System.out.println(actualSchemes.toString());
-//        System.out.println(actualSchemes.get("name"));
+        JSONObject newScheme1 = test.createScheme("Persona");
+        JSONObject newScheme2 = test.createScheme("Carro");
+        JSONObject newScheme3 = test.createScheme("Profesor");
+        JSONObject newScheme4 = test.createScheme("Estudiante", "Persona", "402390083");
 
-        System.out.println("Estudiante");
-        JSONObject newJoinScheme = test.createScheme("Estudiante", "Persona");
-        JSONObject response = client.connect(newJoinScheme);
-        Hashtable<String, JSONObject> actualSchemes = test.deserializeSchemes(response);
+        JSONObject response1 = client.connect(newScheme1);
+        JSONObject response2 = client.connect(newScheme2);
+        JSONObject response3 = client.connect(newScheme3);
+        JSONObject response4 = client.connect(newScheme4);
 
-//        actualSchemes.get()
+        Hashtable<String, JSONObject> actualSchemes = test.deserializeSchemes(response4);
         System.out.println(actualSchemes.toString());
 
+        System.out.println("Esquemas creados... \n");
 
-        JSONObject insert = client.connect(test.insertData("Persona"));
-        JSONObject insert2 = client.connect(test.insertData("Estudiante", "Persona"));
+        System.out.println("Insertando datos...");
 
-        Hashtable<String, Hashtable<String, JSONArray>> actualCollections1 = test.deserializeCollections(insert);
-        System.out.println("Actual Collections1");
-        System.out.println(actualCollections1.toString());
-        System.out.println(insert);
+        JSONObject insert1 = client.connect(test.insertData("Persona", "402390083"));
+        JSONObject insert2 = client.connect(test.insertData("Persona", "122200589521"));
+        JSONObject insert3 = client.connect(test.insertData("Profesor", "12345"));
+        JSONObject insert4 = client.connect(test.insertData("Estudiante", "122200589521", "2017094282"));
+
+        Hashtable<String, Hashtable<String, JSONArray>> actualCollections = test.deserializeCollections(insert4);
+        System.out.println(insert4);
+        System.out.println("Datos insertados...");
         System.out.println("\n");
 
-        Hashtable<String, Hashtable<String, JSONArray>> actualCollections = test.deserializeCollections(insert2);
-        System.out.println("Actual Collections");
-        System.out.println(actualCollections.toString());
-        System.out.println(insert2);
-        System.out.println("\n");
 
-
-        JSONObject deleteScheme = test.deleteScheme("Estudiante");
-        JSONObject response2 = client.connect(deleteScheme);
+        JSONObject deleteScheme = test.deleteScheme("Persona");
+        JSONObject response5 = client.connect(deleteScheme);
         System.out.println("Deleting scheme Estudiante");
-        System.out.println(response2.toString());
+        System.out.println(response5.toString());
 
     }
 }
