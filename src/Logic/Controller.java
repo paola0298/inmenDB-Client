@@ -20,16 +20,15 @@ public class Controller {
     private Client client;
     private Hashtable<String, JSONObject> schemesTable;
 
-    private GUI mainGui;
+//    private GUI mainGui;
 
     /**
      * Constructor por defecto de Controller.
      */
     private Controller() {
         this.schemesTable = new Hashtable<>();
+        this.schemesTable.put("Persona", new JSONObject());
         initialize();
-//        this.mainGui = mainGui;
-
     }
 
     /**
@@ -50,7 +49,14 @@ public class Controller {
     public void createScheme() {
         NewScheme win = new NewScheme();
 
-        JSONObject action = win.show();
+        JSONObject action = win.newScheme();
+
+        System.out.println(action.toString(2));
+    }
+
+    public void updateScheme(JSONObject scheme) {
+        NewScheme win = new NewScheme();
+        JSONObject action = win.updateScheme(scheme);
 
         System.out.println(action.toString(2));
     }
@@ -75,7 +81,6 @@ public class Controller {
             String host = props.get("host_ip").toString();
             int port = Integer.parseInt(props.get("host_port").toString());
             this.client = new Client(host, port);
-            System.out.println("[Info] Settings initialized successfully");
         } catch (IOException e) {
             System.out.println("[Error] Could not read settings");
         }

@@ -3,6 +3,7 @@ package Gui;
 import Logic.Controller;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,6 +20,8 @@ import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Hashtable;
+
 /**
  * Clase que muestra la interfaz necesaria para generar un nuevo esquema, así como generar el JSONObject
  * correspondiente.
@@ -29,8 +32,15 @@ public class NewScheme extends Application {
 
     private Controller controller;
     private static JSONObject generatedJson;
-    private ToggleGroup primaryKeyGroup;
+    private static JSONObject editableJson;
+
     private ImageView addButton;
+    private TextField schemeNameField;
+    private ToggleGroup primaryKeyGroup;
+
+    private final int SCREEN_WIDTH = 600;
+    private final int SCREEN_HEIGHT = 400;
+    private static boolean modifyScheme = false;
 
     /**
      * Método que inicializa y configura la interfaz.
@@ -51,9 +61,8 @@ public class NewScheme extends Application {
         namePanel.setAlignment(Pos.CENTER);
         namePanel.setPadding(new Insets(10));
         Label schemeNameLabel = new Label("Nombre del esquema: ");
-        TextField schemeNameField = new TextField();
+        schemeNameField = new TextField();
         namePanel.getChildren().addAll(schemeNameLabel, schemeNameField);
-
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
@@ -85,21 +94,11 @@ public class NewScheme extends Application {
 
         ContextMenu cm = new ContextMenu();
         MenuItem normalItem = new MenuItem("Normal");
-        normalItem.setOnAction(actionEvent -> {
-            attrGrid.getChildren().remove(addButton);
-            addAttribute(attrGrid);
-            attrGrid.add(addButton, 4, attrGrid.getRowCount());
-            GridPane.setHalignment(addButton, HPos.CENTER);
-        });
+        normalItem.setOnAction(actionEvent -> addAttribute(attrGrid));
         MenuItem joinItem = new MenuItem("Join");
         joinItem.setOnAction(actionEvent -> {
-
-            //TODO verificar si hay esquemas
             if (!controller.getSchemesTable().isEmpty()) {
-                attrGrid.getChildren().remove(addButton);
                 addJoinAttribute(attrGrid);
-                attrGrid.add(addButton, 4, attrGrid.getRowCount());
-                GridPane.setHalignment(addButton, HPos.CENTER);
             } else {
                 showAlert("No hay esquemas disponibles", Alert.AlertType.INFORMATION);
             }
@@ -113,11 +112,12 @@ public class NewScheme extends Application {
         addButton.setOnMouseEntered(mouseEvent -> addButton.setEffect(new DropShadow(6, Color.BLACK)));
         addButton.setOnMouseExited(mouseEvent -> addButton.setEffect(null));
 
-        attrGrid.add(addButton, 4, attrGrid.getRowCount());
-
         upperContainer.getChildren().addAll(namePanel, scrollPane);
 
         HBox options = new HBox();
+        HBox leftContainer = new HBox(addButton);
+        HBox.setHgrow(leftContainer, Priority.ALWAYS);
+        leftContainer.setAlignment(Pos.CENTER_LEFT);
         options.setSpacing(15);
         options.setPadding(new Insets(5));
         options.setAlignment(Pos.CENTER_RIGHT);
@@ -128,14 +128,11 @@ public class NewScheme extends Application {
         });
         Button accept = new Button("Aceptar");
         accept.setOnAction(actionEvent -> {
-            if (attrGrid.getRowCount() > 2) {
+            if (attrGrid.getRowCount() > 1) {
                 if (!schemeNameField.getText().isBlank()) {
-                    attrGrid.getChildren().remove(addButton);
-                    if (createJson(attrGrid, schemeNameField.getText())) {
-                        attrGrid.add(addButton, 4, attrGrid.getRowCount());
+                    if (createJson(attrGrid)) {
                         stage.close();
                     } else {
-                        attrGrid.add(addButton, 4, attrGrid.getRowCount());
                         showAlert("Atributos con valores inválidos", Alert.AlertType.ERROR);
                     }
                 } else {
@@ -145,14 +142,39 @@ public class NewScheme extends Application {
                 showAlert("El esquema debe tener al menos un atributo", Alert.AlertType.ERROR);
             }
         });
-        options.getChildren().addAll(cancel, accept);
+        options.getChildren().addAll(leftContainer, cancel, accept);
+
+        if (modifyScheme) {
+            loadScheme(attrGrid);
+        }
 
         mainLayout.setCenter(upperContainer);
         mainLayout.setBottom(options);
-        Scene scene = new Scene(mainLayout, 600, 400);
+        Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
         stage.show();
+    }
+
+    private void loadScheme(GridPane container) {
+        System.out.println("Window set to modify..");
+
+        schemeNameField.setText(editableJson.getString("name"));
+        schemeNameField.setEditable(false);
+
+        JSONArray names = editableJson.getJSONArray("attrName");
+        JSONArray types = editableJson.getJSONArray("attrType");
+        JSONArray sizes = editableJson.getJSONArray("attrSize");
+
+        int attrCount = editableJson.getInt("attrCount");
+        for (int i=0; i<attrCount; i++) {
+            String name = names.getString(i);
+
+            String type = types.getString(i);
+
+            int size = sizes.getInt(i);
+
+        }
     }
 
     /**
@@ -171,12 +193,17 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
 
-        //TODO cargar los esquemas disponibles desde el servidor o localmente
+        Hashtable<String, JSONObject> localSchemes = controller.getSchemesTable();
+
         ComboBox<String> schemeToSelect = new ComboBox<>();
+        for (String scheme: localSchemes.keySet()){
+            schemeToSelect.getItems().add(scheme);
+        }
 
         RadioButton primary = new RadioButton();
         primary.setUserData(container.getRowCount());
@@ -185,26 +212,28 @@ public class NewScheme extends Application {
             primary.setSelected(true);
         }
 
-        ImageView delete = new ImageView(loadImg("res/images/delete.png"));
-        delete.setFitWidth(25);
-        delete.setFitHeight(25);
-
-        delete.setUserData(container.getRowCount());
-        delete.setOnMouseClicked(mouseEvent -> {
-            primary.setToggleGroup(null);
-            container.getChildren().removeAll(attrName, attrType, schemeToSelect, primary, delete, addButton);
-            reallocate(container, (Integer) delete.getUserData());
-            container.add(addButton, 4, container.getRowCount());
-            refreshGrid(container);
-        });
-
         GridPane.setHalignment(attrName, HPos.CENTER);
         GridPane.setHalignment(attrType, HPos.CENTER);
         GridPane.setHalignment(schemeToSelect, HPos.CENTER);
         GridPane.setHalignment(primary, HPos.CENTER);
-        GridPane.setHalignment(delete, HPos.CENTER);
 
-        container.addRow(container.getRowCount(), attrName, attrType, schemeToSelect, primary, delete);
+        if (!modifyScheme) {
+            ImageView delete = new ImageView(loadImg("res/images/delete.png"));
+            delete.setFitWidth(25);
+            delete.setFitHeight(25);
+            delete.setUserData(container.getRowCount());
+            delete.setOnMouseClicked(mouseEvent -> {
+                primary.setToggleGroup(null);
+                container.getChildren().removeAll(attrName, attrType, schemeToSelect, primary, delete);
+                refreshGrid(container);
+            });
+
+            GridPane.setHalignment(delete, HPos.CENTER);
+            container.addRow(container.getRowCount(), attrName, attrType, schemeToSelect, primary, delete);
+
+        } else {
+            container.addRow(container.getRowCount(), attrName, attrType, schemeToSelect, primary);
+        }
     }
 
     /**
@@ -218,60 +247,48 @@ public class NewScheme extends Application {
         ComboBox<String> attrType = new ComboBox<>(
                 FXCollections.observableArrayList("int", "string", "float", "long", "double"));
         attrType.getSelectionModel().select(0);
+
         Spinner<Integer> attrSize = new Spinner<>();
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 512, 1);
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5000, 1);
         attrSize.setValueFactory(valueFactory);
-
-        RadioButton primary = new RadioButton();
-        primary.setUserData(container.getRowCount());
-        primary.setToggleGroup(primaryKeyGroup);
-        if (container.getRowCount() == 1) {
-            primary.setSelected(true);
-        }
-
-        ImageView delete = new ImageView(loadImg("res/images/delete.png"));
-        delete.setFitHeight(25);
-        delete.setFitWidth(25);
-
-        delete.setUserData(container.getRowCount());
-        delete.setOnMouseClicked(mouseEvent -> {
-            if (primary.isSelected()) {
-                if (primaryKeyGroup.getToggles().size() > 1) {
-                    primaryKeyGroup.selectToggle(primaryKeyGroup.getToggles().get(1));
-                }
-            }
-            primary.setToggleGroup(null);
-            container.getChildren().removeAll(attrName, attrType, attrSize, primary, delete, addButton);
-            reallocate(container, (Integer) delete.getUserData());
-            container.add(addButton, 4, container.getRowCount());
-
-            refreshGrid(container);
-        });
+        attrSize.setEditable(true);
 
         GridPane.setHalignment(attrName, HPos.CENTER);
         GridPane.setHalignment(attrType, HPos.CENTER);
         GridPane.setHalignment(attrSize, HPos.CENTER);
-        GridPane.setHalignment(primary, HPos.CENTER);
-        GridPane.setHalignment(delete, HPos.CENTER);
 
-        container.addRow(container.getRowCount(), attrName, attrType, attrSize, primary, delete);
-    }
-
-    /**
-     * Éste método se encarga de eliminar las filas vacías dentro del gridpane contenedor de los atributos.
-     * @param container Gridpane principal que contiene los atributos.
-     * @param rowDeleted Índice de la fila que fue eliminada.
-     */
-    private void reallocate(GridPane container, int rowDeleted) {
-
-        int rowCount = container.getRowCount()-1;
-        for (; rowDeleted<rowCount; rowDeleted++) {
-            for (int column=0; column<5; column++) {
-                int actualElement = rowDeleted*5+column;
-                Node item = container.getChildren().get(actualElement);
-                GridPane.setRowIndex(item, rowDeleted);
-                GridPane.setColumnIndex(item, column);
+        if (!modifyScheme) {
+            System.out.println("Full control");
+            RadioButton primary = new RadioButton();
+            primary.setUserData(container.getRowCount());
+            primary.setToggleGroup(primaryKeyGroup);
+            if (container.getRowCount() == 1) {
+                primary.setSelected(true);
             }
+
+            ImageView delete = new ImageView(loadImg("res/images/delete.png"));
+            delete.setFitHeight(25);
+            delete.setFitWidth(25);
+
+            delete.setUserData(container.getRowCount());
+            delete.setOnMouseClicked(mouseEvent -> {
+                if (primary.isSelected()) {
+                    if (primaryKeyGroup.getToggles().size() > 1) {
+                        primaryKeyGroup.selectToggle(primaryKeyGroup.getToggles().get(1));
+                    }
+                }
+                primary.setToggleGroup(null);
+                container.getChildren().removeAll(attrName, attrType, attrSize, primary, delete);
+                refreshGrid(container);
+            });
+
+            GridPane.setHalignment(primary, HPos.CENTER);
+            GridPane.setHalignment(delete, HPos.CENTER);
+            container.addRow(container.getRowCount(), attrName, attrType, attrSize, primary, delete);
+
+        } else {
+            System.out.println("Limited control");
+            container.addRow(container.getRowCount(), attrName, attrType, attrSize);
         }
     }
 
@@ -280,66 +297,67 @@ public class NewScheme extends Application {
      * @param container Gridpane principal que contiene los atributos.
      */
     private void refreshGrid(GridPane container) {
-        container.getChildren().remove(addButton);
+        int columnCount = container.getColumnCount();
 
         for (int row=0; row<container.getRowCount()-1; row++) {
-            for (int column=0; column<5; column++) {
-                int index = ((row*5)+column);
+            //TODO column count -> 5
+            for (int column=0; column<columnCount; column++) {
+                int index = ((row*columnCount)+column);
                 Node item = container.getChildren().get(index);
                 GridPane.setColumnIndex(item, column);
                 GridPane.setRowIndex(item, row);
             }
         }
-
-        container.add(addButton, 4, container.getRowCount());
-
     }
 
     /**
      * Éste método se encarga de generar el json, el cual será enviado al servidor.
      * @param container Gridpane principal que contiene los atributos.
-     * @param nameField Nombre del esquema a crear.
      * @return true si el json se generó correctamente, de lo contrario devuelve false.
      */
-    private boolean createJson(GridPane container, String nameField) {
-//        System.out.println("Generating json..");
+    private boolean createJson(GridPane container) {
 
         generatedJson = new JSONObject();
         generatedJson.put("action", "createScheme");
 
+
         JSONObject scheme = new JSONObject();
-        scheme.put("name", nameField);
+        scheme.put("name", schemeNameField.getText());
 
         JSONArray nameArray = new JSONArray();
         JSONArray typeArray = new JSONArray();
         JSONArray sizeArray = new JSONArray();
 
+        boolean hasJoin = false;
+
+        int columnCount = container.getColumnCount();
+
         for (int row=1; row<container.getRowCount(); row++) {
-            TextField nameWidget = (TextField) container.getChildren().get(row*5);
+            //TODO column count -> 5
+            TextField nameWidget = (TextField) container.getChildren().get(row*columnCount);
             String typeFlag = (String) nameWidget.getUserData();
 
             if (!nameWidget.getText().isBlank()) {
-                nameArray.put(nameWidget.getText()); //Nombre del atributo
+                nameArray.put(nameWidget.getText());
             } else {
                 return false;
             }
 
             if (typeFlag.equals("normal")) {
                 @SuppressWarnings("unchecked")
-                ComboBox<String> attTypeC = (ComboBox<String>) container.getChildren().get(row*5+1);
-                typeArray.put(attTypeC.getSelectionModel().getSelectedItem()); //Tipo del atributo
+                ComboBox<String> attTypeC = (ComboBox<String>) container.getChildren().get(row*columnCount+1);
+                typeArray.put(attTypeC.getSelectionModel().getSelectedItem());
 
                 @SuppressWarnings("unchecked")
-                Spinner<Integer> attSize = (Spinner<Integer>) container.getChildren().get(row*5+2);
-                sizeArray.put(attSize.getValue()); //Tamaño del atributo
+                Spinner<Integer> attSize = (Spinner<Integer>) container.getChildren().get(row*columnCount+2);
+                sizeArray.put(attSize.getValue());
 
             } else {
                 typeArray.put("join");
-
+                hasJoin = true;
                 @SuppressWarnings("unchecked")
-                ComboBox<String> schemeToJoin = (ComboBox<String>) container.getChildren().get(row*5+2);
-                sizeArray.put(schemeToJoin.getSelectionModel().getSelectedItem()); // Esquema con el cual hacer join
-
+                ComboBox<String> schemeToJoin = (ComboBox<String>) container.getChildren().get(row*columnCount+2);
+                sizeArray.put(schemeToJoin.getSelectionModel().getSelectedItem());
             }
         }
 
@@ -353,14 +371,14 @@ public class NewScheme extends Application {
             }
         }
 
-        scheme.put("name", nameField);
+        scheme.put("hasJoin", hasJoin);
         scheme.put("attrName", nameArray);
         scheme.put("attrType", typeArray);
         scheme.put("attrSize", sizeArray);
         scheme.put("primaryKey", nameArray.getString(((Integer) primaryKeyGroup.getSelectedToggle().getUserData())-1));
+        scheme.put("attrCount", container.getRowCount()-1);
 
         generatedJson.put("scheme", scheme);
-//        System.out.println("Json generated succesfully");
 
         return !coincidences;
     }
@@ -388,9 +406,14 @@ public class NewScheme extends Application {
         column3.setPercentWidth(25);
         ColumnConstraints column4 = new ColumnConstraints();
         column4.setPercentWidth(20);
-        ColumnConstraints column5 = new ColumnConstraints();
-        column5.setPercentWidth(5);
-        pane.getColumnConstraints().addAll(column1, column2, column3, column4, column5);
+        if (!modifyScheme) {
+            ColumnConstraints column5 = new ColumnConstraints();
+            column5.setPercentWidth(5);
+
+            pane.getColumnConstraints().addAll(column1, column2, column3, column4, column5);
+        } else {
+            pane.getColumnConstraints().addAll(column1, column2, column3, column4);
+        }
 
         RowConstraints row1 = new RowConstraints();
         row1.setMinHeight(50);
@@ -406,8 +429,16 @@ public class NewScheme extends Application {
      * Método que muestra la ventana de creación de nuevo esquema.
      * @return JSONObject conteniendo el esquema a crear.
      */
-    public JSONObject show() {
+    public JSONObject newScheme() {
         launch(NewScheme.class);
+        return generatedJson;
+    }
+
+    public JSONObject updateScheme(JSONObject actualScheme) {
+        modifyScheme = true;
+        editableJson = actualScheme;
+        launch(NewScheme.class);
+
         return generatedJson;
     }
 
