@@ -1,46 +1,272 @@
 package Gui;
 
+import Logic.Controller;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
-public class GUI extends Application{
-    private VBox scheme = new VBox();
-    private StackPane mainWindowLayout = new StackPane();
-    private GridPane grid = new GridPane();
-    private Button newscheme = new Button();
-    private HBox titlebutton = new HBox();
-    private HBox newSchemeContainer;
-    private VBox mainSpace = new VBox();
-    public ScrollPane schemeArea = new ScrollPane();
-    private ScrollPane dataArea = new ScrollPane();
-    private ScrollPane indexArea = new ScrollPane();
+import java.util.Hashtable;
 
+public class GUI extends Application{
+    private Controller controller;
+
+    private VBox scheme;
+    private StackPane mainWindowLayout;
+    private GridPane grid;
+    private Button newscheme;
+    private HBox titlebutton;
+    private HBox newSchemeContainer;
+    private VBox mainSpace;
+    public ScrollPane schemeArea;
+    private ScrollPane dataArea;
+    private ScrollPane indexArea;
+
+    private BorderPane mainLayout;
+    private VBox schemesList;
+    private VBox indexList;
 
     public void start(Stage stage) {
-        stage.setTitle("In Memory DataBase");
+        this.controller = Controller.getInstance();
+        this.controller.setMainGui(this);
 
-        /**Panel de la pantalla principal, aquí se van a
-         * agregar los componentes de esta pantalla
-         * @author Brayan Rodríguez
-         */
+        //Contenedor principal de la interfaz
+        mainLayout = new BorderPane();
+        mainLayout.setPadding(new Insets(5));
 
-        addtoMaingrid(mainWindowLayout);
+        //Contenedor lateral (Esquemas e índices)
+        VBox sidePanel = new VBox();
+        sidePanel.setMinWidth(250);
+        sidePanel.setPadding(new Insets(5));
+        sidePanel.setSpacing(10);
+        sidePanel.setAlignment(Pos.TOP_CENTER);
 
-        Scene scene = new Scene(mainWindowLayout, 1280, 900);
+        //Contenedor de los esquemas
+        VBox schemesContainer = new VBox();
+        schemesContainer.setSpacing(5);
+        schemesContainer.setAlignment(Pos.TOP_LEFT);
+        VBox.setVgrow(schemesContainer, Priority.ALWAYS);
+        //Header de la lista de esquemas
+        HBox schemeHeader = new HBox();
+        Label schemesTitle = new Label("Esquemas");
+        schemesTitle.setStyle("-fx-font-size: 16px;");
+        HBox addSchemeContainer = new HBox();
+        addSchemeContainer.setPadding(new Insets(0, 5, 0, 0));
+        addSchemeContainer.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(addSchemeContainer, Priority.ALWAYS);
+        ImageView addScheme = new ImageView(loadImg("res/images/plus.png"));
+        addScheme.setFitHeight(25);
+        addScheme.setFitWidth(25);
+        addScheme.setOnMouseClicked(mouseEvent -> {
+            System.out.println("Add scheme..");
+            this.controller.generateScheme();
+        });
+        addSchemeContainer.getChildren().add(addScheme);
+        schemeHeader.getChildren().addAll(schemesTitle, addSchemeContainer);
+        //Lista de esquemas
+        ScrollPane schemesWrapper = new ScrollPane();
+        schemesWrapper.setFitToHeight(true);
+        schemesWrapper.setFitToWidth(true);
+        VBox.setVgrow(schemesWrapper, Priority.ALWAYS);
+        schemesList = new VBox();
+        schemesWrapper.setContent(schemesList);
+        VBox.setVgrow(schemesList, Priority.ALWAYS);
+        schemesContainer.getChildren().addAll(schemeHeader, schemesWrapper);
+
+        //Contenedor de índices
+        VBox indexContainer = new VBox();
+        indexContainer.setSpacing(5);
+        indexContainer.setAlignment(Pos.TOP_LEFT);
+        VBox.setVgrow(indexContainer, Priority.ALWAYS);
+        //Header de la lista de índices
+        HBox indexHeader = new HBox();
+        Label indexTitle = new Label("Índices");
+        indexTitle.setStyle("-fx-font-size: 16px;");
+        HBox addIndexContainer = new HBox();
+        addIndexContainer.setPadding(new Insets(0, 5, 0, 0));
+        addIndexContainer.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(addIndexContainer, Priority.ALWAYS);
+        ImageView addIndex = new ImageView(loadImg("res/images/plus.png"));
+        addIndex.setFitHeight(25);
+        addIndex.setFitWidth(25);
+        addIndex.setOnMouseClicked(mouseEvent -> {
+            System.out.println("Add index..");
+        });
+        addIndexContainer.getChildren().add(addIndex);
+        indexHeader.getChildren().addAll(indexTitle, addIndexContainer);
+        //Lista de índices
+        ScrollPane indexWrapper = new ScrollPane();
+        indexWrapper.setFitToWidth(true);
+        indexWrapper.setFitToHeight(true);
+        VBox.setVgrow(indexWrapper, Priority.ALWAYS);
+        indexList = new VBox();
+        VBox.setVgrow(indexList, Priority.ALWAYS);
+        indexContainer.getChildren().addAll(indexHeader, indexWrapper);
+
+        sidePanel.getChildren().addAll(schemesContainer, indexContainer);
+
+        //Contenedor principal de contenido
+        ScrollPane mainWrapper = new ScrollPane();
+        mainWrapper.setFitToHeight(true);
+        mainWrapper.setFitToWidth(true);
+        VBox.setVgrow(mainWrapper, Priority.ALWAYS);
+        HBox.setHgrow(mainWrapper, Priority.ALWAYS);
+        //Stack del contenido
+        StackPane mainStack = new StackPane();
+        mainWrapper.setContent(mainStack);
+
+        //Contendor del contenido de esquemas
+        VBox schemeDataContainer = new VBox();
+        HBox schemeDataHeader = new HBox();
+
+
+
+//        scheme = new VBox();
+//        mainWindowLayout = new StackPane();
+//        grid = new GridPane();
+//        newscheme = new Button();
+//        titlebutton = new HBox();
+//        mainSpace = new VBox();
+//        schemeArea = new ScrollPane();
+//        dataArea = new ScrollPane();
+//        indexArea = new ScrollPane();
+
+//        Panel de la pantalla principal, aquí se van a agregar los componentes de esta pantalla
+//        addtoMaingrid();
+
+//        Scene scene = new Scene(mainWindowLayout, 1280, 900);
+
+        mainLayout.setLeft(sidePanel);
+
+        Scene scene = new Scene(mainLayout, 1000, 600);
         stage.setMinWidth(640);
         stage.setMinHeight(480);
-
+        stage.setTitle("In Memory DataBase");
         stage.setScene(scene);
-        stage.show();
 
+        stage.show();
+    }
+
+    /**
+     * Éste método recibe el hashtable con los esquemas desde el servidor y los muestra en la
+     * lista de la interfaz
+     * @param schemes HashTable de esquemas.
+     */
+    public void loadSchemesList(Hashtable<String, JSONObject> schemes) {
+        boolean sep = false;
+
+        for (String schemeName: schemes.keySet()) {
+            HBox row = new HBox();
+            row.setAlignment(Pos.CENTER_LEFT);
+
+            ContextMenu menu = new ContextMenu();
+            MenuItem itemDelete = new MenuItem("Eliminar");
+            itemDelete.setOnAction(actionEvent -> deleteScheme(schemeName));
+            menu.getItems().addAll(itemDelete);
+
+            row.setOnMouseEntered(mouseEvent -> {
+                row.setStyle("-fx-background-color: #dbdbdb;");
+            });
+            row.setOnMouseExited(mouseEvent -> {
+                row.setStyle("-fx-background-color: transparent;");
+            });
+            row.setOnMouseClicked(mouseEvent -> {
+                if (mouseEvent.getButton().equals(MouseButton.SECONDARY)) {
+                    if (!menu.isShowing()) {
+                        menu.show(row, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+                    } else {
+                        menu.hide();
+                    }
+                } else {
+                    queryScheme(schemeName);
+                }
+            });
+
+            Label schemeLabel = new Label(schemeName);
+            row.getChildren().add(schemeLabel);
+
+            if (!sep) {
+                Platform.runLater(() -> schemesList.getChildren().add(row));
+                sep = true;
+            } else {
+                Platform.runLater(() -> schemesList.getChildren().addAll(new Separator(), row));
+                sep = false;
+            }
+        }
+    }
+
+    private void deleteScheme(String schemeName) {
+        //TODO mandar solicitud al servidor para eliminar esquema
+        System.out.println("Eliminar esquema " + schemeName);
+    }
+
+    private void queryScheme(String schemeName) {
+        //TODO obtener datos del esquema desde el servidor
+        System.out.println("Mostrar datos de esquema " + schemeName);
+    }
+
+    /**
+     * Método encargado de cargar una imagen desde la ruta especificada.
+     * @param relativePath Ruta relativa de la imagen.
+     * @return Instancia de la imagen.
+     */
+    private Image loadImg(String relativePath) {
+        String cwd = System.getProperty("user.dir");
+        return new Image("file://" + cwd + "/" + relativePath);
+    }
+
+    public void showMessage(String message) {
+        HBox messageContainer = new HBox();
+        messageContainer.setPrefHeight(0);
+        messageContainer.setStyle("-fx-background-color: #dbdbdb;");
+        messageContainer.setAlignment(Pos.CENTER_LEFT);
+
+        Label messageLabel = new Label(message);
+        messageLabel.setPadding(new Insets(0, 10, 0, 10));
+
+        mainLayout.setBottom(messageContainer);
+
+        Thread messageThread = new Thread(() -> {
+            try {
+                //Expandir el mensaje
+                double size = 0;
+                for (double i = 0; i < 25; i++) {
+                    Thread.sleep(50);
+                    size += 1;
+                    double finalSize = size;
+                    Platform.runLater(() -> messageContainer.setPrefHeight(finalSize));
+
+                }
+
+                Platform.runLater(() -> messageContainer.getChildren().add(messageLabel));
+                Thread.sleep(3000);
+                Platform.runLater(() -> messageContainer.getChildren().clear());
+
+                //Contraer el mensaje
+                for (double i=25; i>0; i--) {
+                    Thread.sleep(50);
+                    size -= 1;
+                    double finalSize = size;
+                    Platform.runLater(() -> messageContainer.setPrefHeight(finalSize));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Platform.runLater(() -> mainLayout.setBottom(null));
+        });
+        messageThread.setDaemon(true);
+        messageThread.start();
     }
 
     /**
@@ -48,7 +274,7 @@ public class GUI extends Application{
      * al gridpane correspondiente a la pantalla principal
      * @author Brayan Rodríguez
      */
-    public void addtoMaingrid(StackPane mainWindowLayout){
+    public void addtoMaingrid(){
         grid.setHgap(8);
         grid.setVgap(8);
         grid.setPadding(new Insets(10,10,10,10));
@@ -148,7 +374,6 @@ public class GUI extends Application{
 
     }
 
-
     public void addIndexSpace(GridPane grid) {
         VBox index = new VBox();
         index.setPadding(new Insets(10, 10, 10, 10));
@@ -161,27 +386,15 @@ public class GUI extends Application{
         title.setSpacing(30);
         Label indextitle = new Label("Índices");
         Button addIndex = new Button("Nuevo Índice...");
-        addIndex.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                System.out.println("Añadir índice...");
-                //Se debe hacer este llamado cuando se termine de la pantalla para crear el índice
-                addIndexTitle(index, "arbol");
-
-
-            }
+        addIndex.setOnAction(actionEvent -> {
+            System.out.println("Añadir índice...");
+            //Se debe hacer este llamado cuando se termine de la pantalla para crear el índice
+            addIndexTitle(index, "arbol");
         });
         title.getChildren().addAll(indextitle, addIndex);
-
         index.getChildren().addAll(title);
-
-
         indexArea.setContent(index);
-
-
         grid.add(indexArea, 0, 1);
-
-
     }
 
     public void addIndexTitle(VBox index, String name) {
@@ -214,7 +427,6 @@ public class GUI extends Application{
 
     }
 
-
     /**
      * FALTAN MODIFICACIONES
      * Este método funciona para visualizar los datos de un esquema específico
@@ -222,8 +434,9 @@ public class GUI extends Application{
      * @param grid
      * @param schemeName
      */
-    public void addVisualizationDataSpace(GridPane grid, String schemeName) { //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y actualizar valores de ese esquema
-
+    public void addVisualizationDataSpace(GridPane grid, String schemeName) {
+        //************Falta añadir que reciba un objeto esquema para que pueda tomarse el nombre y
+        // actualizar valores de ese esquema
 
         //En este VBox se agrega el título del esquema y la tabla para visualizar los datos
         VBox mainSpace = new VBox();
@@ -238,13 +451,10 @@ public class GUI extends Application{
         Button addData = new Button("Añadir Dato...");
 
 
-        addData.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                System.out.println("Añadir dato");
-                mainSpace.getChildren().add(setGridData());
+        addData.setOnAction(actionEvent -> {
+            System.out.println("Añadir dato");
+            mainSpace.getChildren().add(setGridData());
 
-            }
         });
 
 
@@ -261,7 +471,6 @@ public class GUI extends Application{
 
 
     }
-
 
     private GridPane setGridData() {
         GridPane data = new GridPane();
@@ -285,5 +494,9 @@ public class GUI extends Application{
 //        Button b = new Button("ve");
 //        data.add(b,1,0);
         return data;
+    }
+
+    public void show() {
+        launch(GUI.class);
     }
 }
