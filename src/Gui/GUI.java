@@ -9,7 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -371,7 +371,6 @@ public class GUI extends Application{
 
         scheme.getChildren().addAll(newSchemeContainer);
     }
-
 
     public void addIndexSpace(GridPane grid) {
         VBox index = new VBox();
