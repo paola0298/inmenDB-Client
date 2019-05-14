@@ -26,6 +26,7 @@ import java.util.Hashtable;
 /**
  * Clase que muestra la interfaz necesaria para generar un nuevo esquema, así como generar el JSONObject
  * correspondiente.
+ *
  * @author marlon
  * @version 1.0
  */
@@ -199,6 +200,7 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de tipo Join.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
@@ -243,6 +245,7 @@ public class NewScheme extends Application {
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de los
      * tipos convencionales.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
@@ -269,6 +272,7 @@ public class NewScheme extends Application {
             primary.setToggleGroup(primaryKeyGroup);
             if (container.getRowCount() == 1) {
                 primary.setSelected(true);
+
             }
 
             ImageView delete = new ImageView(loadImg("res/images/delete.png"));
@@ -299,15 +303,16 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de refrescar el contenedor de los atributos.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void refreshGrid(GridPane container) {
         int columnCount = container.getColumnCount();
-
         for (int row=0; row<container.getRowCount()-1; row++) {
             //TODO column count -> 5
             for (int column=0; column<columnCount; column++) {
                 int index = ((row*columnCount)+column);
+
                 Node item = container.getChildren().get(index);
                 GridPane.setColumnIndex(item, column);
                 GridPane.setRowIndex(item, row);
@@ -367,8 +372,8 @@ public class NewScheme extends Application {
 
         boolean coincidences = false;
 
-        for (int i=0; i<nameArray.length(); i++) {
-            for (int j=i+1; j<nameArray.length(); j++) {
+        for (int i = 0; i < nameArray.length(); i++) {
+            for (int j = i + 1; j < nameArray.length(); j++) {
                 if (nameArray.getString(i).equals(nameArray.getString(j))) {
                     coincidences = true;
                 }
