@@ -16,19 +16,25 @@ import java.util.Properties;
  * @version 1.0
  */
 public class Controller {
-    private static Controller instance;
-    private Client client;
-    private Hashtable<String, JSONObject> schemesTable;
 
-//    private GUI mainGui;
+    private static Controller instance;
+    private GUI mainGui;
+    private Client client;
+
+    private Hashtable<String, JSONObject> localSchemes;
 
     /**
      * Constructor por defecto de Controller.
      */
     private Controller() {
-        this.schemesTable = new Hashtable<>();
-        this.schemesTable.put("Persona", new JSONObject());
+        this.localSchemes = new Hashtable<>();
+        this.localSchemes.put("Persona", new JSONObject());
+        this.localSchemes.put("Carro", new JSONObject());
         initialize();
+    }
+
+    public void setMainGui(GUI mainGui) {
+        this.mainGui = mainGui;
     }
 
     /**
@@ -46,12 +52,30 @@ public class Controller {
      * Éste método se encarga de mostrar la ventana para crear un nuevo esquema, así como enviar la solicitud
      * al servidor, y actualizar la interfaz.
      */
-    public void createScheme() {
-        NewScheme win = new NewScheme();
+    public void generateScheme() {
+        NewScheme.newScheme();
+    }
 
-        JSONObject action = win.newScheme();
+    public void sendScheme(JSONObject schemeToSend) {
+        System.out.println(schemeToSend.toString());
 
-        System.out.println(action.toString(2));
+//        JSONObject response = client.connect(schemeToSend);
+        JSONObject response = new JSONObject();
+        response.put("status", "SUCCESS");
+
+        //TODO recibir el hashtable con los esquemas y deserializarlo
+
+        if (response.getString("status").equals("SUCCESS")) {
+            //Test
+            localSchemes = new Hashtable<>();
+            localSchemes.put("Curso", new JSONObject());
+            localSchemes.put("Universidad", new JSONObject());
+            //
+            mainGui.loadSchemesList(localSchemes);
+            mainGui.showMessage("Esquema añadido!");
+        } else {
+
+        }
     }
 
     public void updateScheme(JSONObject scheme) {
@@ -61,12 +85,16 @@ public class Controller {
         System.out.println(action.toString(2));
     }
 
+    public void queryScheme(String schemeName) {
+
+    }
+
     /**
      * Método para obtener el HashTable local de esquemas.
      * @return HashTable de esquemas.
      */
-    public Hashtable<String, JSONObject> getSchemesTable() {
-        return schemesTable;
+    public Hashtable<String, JSONObject> getLocalSchemes() {
+        return localSchemes;
     }
 
     /**
