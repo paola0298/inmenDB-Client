@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -422,7 +421,6 @@ public class GUI extends Application{
         indextitle.getChildren().addAll(title, edit);
         index.getChildren().addAll(indextitle);
 
-
     }
 
     /**
@@ -440,7 +438,6 @@ public class GUI extends Application{
     }
 
     /**
->>>>>>> Se hacen cambios en el control de la tabla que muestran los datos
      * FALTAN MODIFICACIONES
      * Este método funciona para visualizar los datos de un esquema específico
      *
@@ -466,6 +463,7 @@ public class GUI extends Application{
         addData.setOnAction(actionEvent -> {
             System.out.println("Añadir dato");
             mainSpace.getChildren().add(setGridData());
+
         });
 
 
@@ -475,8 +473,6 @@ public class GUI extends Application{
 
         mainSpace.getChildren().add(0, titleData);//, addToGridData(grid));//, addToGridData(grid));
         mainSpace.getChildren().add(1, setGridData());
-
-//        mainSpace.getChildren().addAll(titleData, createTable());
 
         dataArea.setContent(mainSpace);
         dataArea.setPannable(true);
@@ -510,10 +506,6 @@ public class GUI extends Application{
         return data;
     }
 
-    public void show() {
-        launch(GUI.class);
-    }
-
     /**
      * Este método se encarga de las configuraciones de la tabla para visualizar los datos
      *
@@ -541,5 +533,9 @@ public class GUI extends Application{
 //        data.getColumns().addAll(column1, column2);
 //        data.getItems().add(new Scheme());
         return data;
+    }
+
+    public void show() {
+        launch(GUI.class);
     }
 }

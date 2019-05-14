@@ -1,7 +1,10 @@
 import Gui.GUI;
+<<<<<<< HEAD
 import Logic.Controller;
 import org.json.JSONArray;
 import org.json.JSONObject;
+=======
+>>>>>>> 67abc4692a406c6ac270ef512a8833adc8df857a
 
 public class Main {
 
@@ -39,8 +42,11 @@ public class Main {
 //        scheme.put("hasJoin", false);
 //
 //        controller.updateScheme(scheme);
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 67abc4692a406c6ac270ef512a8833adc8df857a
 
     }
 }

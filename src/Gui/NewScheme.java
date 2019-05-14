@@ -2,6 +2,7 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -25,6 +26,7 @@ import java.util.Hashtable;
 /**
  * Clase que muestra la interfaz necesaria para generar un nuevo esquema, así como generar el JSONObject
  * correspondiente.
+ *
  * @author marlon
  * @version 1.0
  */
@@ -111,6 +113,7 @@ public class NewScheme extends Application {
         addButton.setOnMouseEntered(mouseEvent -> addButton.setEffect(new DropShadow(6, Color.BLACK)));
         addButton.setOnMouseExited(mouseEvent -> addButton.setEffect(null));
 
+
         upperContainer.getChildren().addAll(namePanel, scrollPane);
 
         HBox options = new HBox();
@@ -120,6 +123,7 @@ public class NewScheme extends Application {
         HBox leftContainer = new HBox(addButton);
         HBox.setHgrow(leftContainer, Priority.ALWAYS);
         leftContainer.setAlignment(Pos.CENTER_LEFT);
+
         Button cancel = new Button("Cancelar");
         cancel.setOnAction(actionEvent -> {
             generatedJson.put("status", "CANCELLED");
@@ -133,6 +137,7 @@ public class NewScheme extends Application {
                         controller.sendScheme(generatedJson);
                         stage.close();
                     } else {
+
                         showAlert("Atributos con valores inválidos", Alert.AlertType.ERROR);
                     }
                 } else {
@@ -153,6 +158,7 @@ public class NewScheme extends Application {
         mainLayout.setBottom(options);
 
         Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
+
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
         stage.show();
@@ -192,6 +198,7 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de tipo Join.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
@@ -236,6 +243,7 @@ public class NewScheme extends Application {
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de los
      * tipos convencionales.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
@@ -262,6 +270,7 @@ public class NewScheme extends Application {
             primary.setToggleGroup(primaryKeyGroup);
             if (container.getRowCount() == 1) {
                 primary.setSelected(true);
+
             }
 
             ImageView delete = new ImageView(loadImg("res/images/delete.png"));
@@ -292,11 +301,11 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de refrescar el contenedor de los atributos.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void refreshGrid(GridPane container) {
         int columnCount = container.getColumnCount();
-
         for (int row=0; row<container.getRowCount()-1; row++) {
             //TODO column count -> 5
             for (int column=0; column<columnCount; column++) {
