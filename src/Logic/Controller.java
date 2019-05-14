@@ -69,24 +69,22 @@ public class Controller {
 
         JSONObject response = client.connect(schemeToSend);
 
-        //TODO recibir el hashtable con los esquemas y deserializarlo
-
         if (response.getString("status").equals("success")) {
             try {
                 @SuppressWarnings("unchecked")
                 Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
                 mainGui.loadSchemesList(updatedSchemes);
-                mainGui.showMessage("[INFO] Esquema añadido correctamente - " + getFinalTime(startTime));
+                mainGui.showMessage("Esquema añadido correctamente - " + getFinalTime(startTime));
                 localSchemes = updatedSchemes;
             } catch (IOException e) {
-                mainGui.showMessage("[ERROR] " + e.getMessage() + " - " + getFinalTime(startTime));
+                mainGui.showMessage(e.getMessage() + " - " + getFinalTime(startTime));
             }
         } else {
             if (response.getString("error").equals("Already exists")) {
                 mainGui.loadSchemesList(localSchemes);
-                mainGui.showMessage("[ERROR] El esquema ya existe - " + getFinalTime(startTime));
+                mainGui.showMessage("El esquema ya existe - " + getFinalTime(startTime));
             } else {
-                mainGui.showMessage("[ERROR] No se pudo crear el esquema - " + getFinalTime(startTime));
+                mainGui.showMessage("No se pudo crear el esquema - " + getFinalTime(startTime));
             }
         }
     }
@@ -108,19 +106,23 @@ public class Controller {
                 @SuppressWarnings("unchecked")
                 Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
                 mainGui.loadSchemesList(updatedSchemes);
-                mainGui.showMessage("[INFO] Esquemas cargados correctamente - " + getFinalTime(startTime));
+                mainGui.showMessage("Esquemas cargados correctamente - " + getFinalTime(startTime));
                 localSchemes = updatedSchemes;
 
             } catch (IOException e) {
-                mainGui.showMessage("[ERROR] al recibir los esquemas" + getFinalTime(startTime));
+                mainGui.showMessage("Error al recibir los esquemas - " + getFinalTime(startTime));
             }
         } else {
-            mainGui.showMessage("[ERROR] al recuperar los esquemas" + getFinalTime(startTime));
+            mainGui.showMessage("No se pudieron recuperar los esquemas - " + getFinalTime(startTime));
         }
     }
 
     public void querySchemeData(String schemeName) {
+        JSONObject action = new JSONObject();
+        action.put("action", "getSchemeData");
+        action.put("schemeName", schemeName);
 
+        //TODO procesar los datos recibidos del servidor
     }
 
     /**
