@@ -1,6 +1,7 @@
 package Logic;
 
 import Connection.Client;
+
 import Gui.GUI;
 import Gui.NewScheme;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import java.util.Properties;
 /**
  * Esta clase se encarga de manejar la lógica y comunicación con el servidor, así como realizar las
  * operaciones necesarias en la interfaz.
+ *
  * @version 1.0
  */
 public class Controller {
@@ -39,6 +41,7 @@ public class Controller {
 
     /**
      * Éste método sirve para obtener la instancia del controlador.
+     *
      * @return Instancia de Controller.
      */
     public static Controller getInstance() {
@@ -91,6 +94,7 @@ public class Controller {
 
     /**
      * Método para obtener el HashTable local de esquemas.
+     *
      * @return HashTable de esquemas.
      */
     public Hashtable<String, JSONObject> getLocalSchemes() {

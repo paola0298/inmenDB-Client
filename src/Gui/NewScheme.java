@@ -2,6 +2,7 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -16,6 +17,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,6 +26,7 @@ import java.util.Hashtable;
 /**
  * Clase que muestra la interfaz necesaria para generar un nuevo esquema, así como generar el JSONObject
  * correspondiente.
+ *
  * @author marlon
  * @version 1.0
  */
@@ -198,10 +201,10 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de tipo Join.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addJoinAttribute(GridPane container) {
-
         TextField attrName = new TextField();
         attrName.setUserData("join");
         Label attrType = new Label("Join");
@@ -243,9 +246,11 @@ public class NewScheme extends Application {
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de los
      * tipos convencionales.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void addAttribute(GridPane container) {
+
         TextField attrName = new TextField();
         attrName.setUserData("normal");
         ComboBox<String> attrType = new ComboBox<>(
@@ -268,6 +273,7 @@ public class NewScheme extends Application {
             primary.setToggleGroup(primaryKeyGroup);
             if (container.getRowCount() == 1) {
                 primary.setSelected(true);
+
             }
 
             ImageView delete = new ImageView(loadImg("res/images/delete.png"));
@@ -298,11 +304,11 @@ public class NewScheme extends Application {
 
     /**
      * Método encargado de refrescar el contenedor de los atributos.
+     *
      * @param container Gridpane principal que contiene los atributos.
      */
     private void refreshGrid(GridPane container) {
         int columnCount = container.getColumnCount();
-
         for (int row=0; row<container.getRowCount()-1; row++) {
             //TODO column count -> 5
             for (int column=0; column<columnCount; column++) {
@@ -369,7 +375,6 @@ public class NewScheme extends Application {
 
         for (int i=0; i<nameArray.length(); i++) {
             for (int j=i+1; j<nameArray.length(); j++) {
-
                 if (nameArray.getString(i).equals(nameArray.getString(j))) {
                     coincidences = true;
                 }
