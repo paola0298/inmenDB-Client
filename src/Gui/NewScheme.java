@@ -203,7 +203,7 @@ public class NewScheme extends Application {
         attrName.setUserData("join");
         Label attrType = new Label("Join");
 
-        Hashtable<String, JSONObject> localSchemes = controller.getLocalSchemes();
+        Hashtable<String, String> localSchemes = controller.getLocalSchemes();
 
         ComboBox<String> schemeToSelect = new ComboBox<>();
         for (String scheme: localSchemes.keySet()){
@@ -216,6 +216,11 @@ public class NewScheme extends Application {
         if (container.getRowCount() == 1) {
             primary.setSelected(true);
         }
+
+        GridPane.setHalignment(attrName, HPos.CENTER);
+        GridPane.setHalignment(attrType, HPos.CENTER);
+        GridPane.setHalignment(schemeToSelect, HPos.CENTER);
+        GridPane.setHalignment(primary, HPos.CENTER);
 
         //TODO no mostrar el primary cuando se edita un esquema
         if (!modifyScheme) {
@@ -375,14 +380,14 @@ public class NewScheme extends Application {
             }
         }
 
-        scheme.put("hasJoin", hasJoin);
+//        scheme.put("hasJoin", hasJoin);
         scheme.put("attrName", nameArray);
         scheme.put("attrType", typeArray);
         scheme.put("attrSize", sizeArray);
         scheme.put("primaryKey", nameArray.getString(((Integer) primaryKeyGroup.getSelectedToggle().getUserData())-1));
-        scheme.put("attrCount", container.getRowCount()-1);
+//        scheme.put("attrCount", container.getRowCount()-1);
 
-        generatedJson.put("scheme", scheme);
+        generatedJson.put("scheme", scheme.toString());
 
         return !coincidences;
     }

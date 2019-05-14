@@ -35,6 +35,8 @@ public class GUI extends Application{
     private BorderPane mainLayout;
     private VBox schemesList;
     private VBox indexList;
+    private TableView schemeDataTable;
+    private Label actualSchemeName;
 
     public void start(Stage stage) {
         this.controller = Controller.getInstance();
@@ -79,6 +81,7 @@ public class GUI extends Application{
         schemesWrapper.setFitToWidth(true);
         VBox.setVgrow(schemesWrapper, Priority.ALWAYS);
         schemesList = new VBox();
+        schemesList.setPadding(new Insets(5));
         schemesWrapper.setContent(schemesList);
         VBox.setVgrow(schemesList, Priority.ALWAYS);
         schemesContainer.getChildren().addAll(schemeHeader, schemesWrapper);
@@ -110,6 +113,7 @@ public class GUI extends Application{
         indexWrapper.setFitToHeight(true);
         VBox.setVgrow(indexWrapper, Priority.ALWAYS);
         indexList = new VBox();
+        indexList.setPadding(new Insets(5));
         VBox.setVgrow(indexList, Priority.ALWAYS);
         indexContainer.getChildren().addAll(indexHeader, indexWrapper);
 
@@ -123,13 +127,29 @@ public class GUI extends Application{
         HBox.setHgrow(mainWrapper, Priority.ALWAYS);
         //Stack del contenido
         StackPane mainStack = new StackPane();
+        VBox.setVgrow(mainStack, Priority.ALWAYS);
+        HBox.setHgrow(mainStack, Priority.ALWAYS);
         mainWrapper.setContent(mainStack);
 
         //Contendor del contenido de esquemas
         VBox schemeDataContainer = new VBox();
+        VBox.setVgrow(schemeDataContainer, Priority.ALWAYS);
+        HBox.setHgrow(schemeDataContainer, Priority.ALWAYS);
+        //Header de los esquemas
         HBox schemeDataHeader = new HBox();
+        schemeDataHeader.setMinHeight(40);
+        schemeDataHeader.setPadding(new Insets(10));
+        actualSchemeName = new Label("Selecciona un esquema");
+        actualSchemeName.setStyle("-fx-font-size: 18px;");
+        schemeDataHeader.getChildren().add(actualSchemeName);
+        //Tabla de datos del esquema
+        schemeDataTable = new TableView();
+        schemeDataTable.getColumns().add(new TableColumn<>("Columna 1"));
+        VBox.setVgrow(schemeDataTable, Priority.ALWAYS);
+        HBox.setHgrow(schemeDataTable, Priority.ALWAYS);
+        schemeDataContainer.getChildren().addAll(schemeDataHeader, schemeDataTable);
 
-
+        mainStack.getChildren().addAll(schemeDataContainer);
 
 //        scheme = new VBox();
 //        mainWindowLayout = new StackPane();
@@ -147,14 +167,16 @@ public class GUI extends Application{
 //        Scene scene = new Scene(mainWindowLayout, 1280, 900);
 
         mainLayout.setLeft(sidePanel);
+        mainLayout.setCenter(mainWrapper);
 
         Scene scene = new Scene(mainLayout, 1000, 600);
         stage.setMinWidth(640);
         stage.setMinHeight(480);
         stage.setTitle("In Memory DataBase");
         stage.setScene(scene);
-
         stage.show();
+
+        controller.querySchemes();
     }
 
     /**
@@ -162,7 +184,8 @@ public class GUI extends Application{
      * lista de la interfaz
      * @param schemes HashTable de esquemas.
      */
-    public void loadSchemesList(Hashtable<String, JSONObject> schemes) {
+    public void loadSchemesList(Hashtable<String, String> schemes) {
+        schemesList.getChildren().clear();
         boolean sep = false;
 
         for (String schemeName: schemes.keySet()) {
@@ -213,6 +236,8 @@ public class GUI extends Application{
     private void queryScheme(String schemeName) {
         //TODO obtener datos del esquema desde el servidor
         System.out.println("Mostrar datos de esquema " + schemeName);
+        controller.querySchemeData(schemeName);
+        actualSchemeName.setText(schemeName);
     }
 
     /**
@@ -249,7 +274,7 @@ public class GUI extends Application{
                 }
 
                 Platform.runLater(() -> messageContainer.getChildren().add(messageLabel));
-                Thread.sleep(3000);
+                Thread.sleep(5000);
                 Platform.runLater(() -> messageContainer.getChildren().clear());
 
                 //Contraer el mensaje
