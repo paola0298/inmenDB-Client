@@ -2,6 +2,7 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -30,7 +31,7 @@ import java.util.Hashtable;
  */
 public class NewScheme extends Application {
 
-    private Controller controller;
+    private static Controller controller;
     private static JSONObject generatedJson;
     private static JSONObject editableJson;
 
@@ -48,7 +49,8 @@ public class NewScheme extends Application {
      */
     @Override
     public void start(Stage stage) {
-        //this.controller = Controller.getInstance();
+        controller = Controller.getInstance();
+
         generatedJson = new JSONObject();
         this.primaryKeyGroup = new ToggleGroup();
 
@@ -98,7 +100,7 @@ public class NewScheme extends Application {
 
         MenuItem joinItem = new MenuItem("Join");
         joinItem.setOnAction(actionEvent -> {
-            if (!controller.getSchemesTable().isEmpty()) {
+            if (!controller.getLocalSchemes().isEmpty()) {
                 addJoinAttribute(attrGrid);
             } else {
                 showAlert("No hay esquemas disponibles", Alert.AlertType.INFORMATION);
@@ -123,9 +125,7 @@ public class NewScheme extends Application {
         HBox.setHgrow(leftContainer, Priority.ALWAYS);
         leftContainer.setAlignment(Pos.CENTER_LEFT);
 
-        attrGrid.add(addButton, 4, attrGrid.getRowCount());
-
-        upperContainer.getChildren().addAll(namePanel, scrollPane);
+//        attrGrid.add(addButton, 4, attrGrid.getRowCount());
 
         Button cancel = new Button("Cancelar");
         cancel.setOnAction(actionEvent -> {
@@ -137,6 +137,7 @@ public class NewScheme extends Application {
             if (attrGrid.getRowCount() > 1) {
                 if (!schemeNameField.getText().isBlank()) {
                     if (createJson(attrGrid)) {
+                        controller.sendScheme(generatedJson);
                         stage.close();
                     } else {
                         showAlert("Atributos con valores inválidos", Alert.AlertType.ERROR);
@@ -205,7 +206,7 @@ public class NewScheme extends Application {
         attrName.setUserData("join");
         Label attrType = new Label("Join");
 
-        Hashtable<String, JSONObject> localSchemes = controller.getSchemesTable();
+        Hashtable<String, JSONObject> localSchemes = controller.getLocalSchemes();
 
         ComboBox<String> schemeToSelect = new ComboBox<>();
         for (String scheme: localSchemes.keySet()){
@@ -432,9 +433,8 @@ public class NewScheme extends Application {
      * Método que muestra la ventana de creación de nuevo esquema.
      * @return JSONObject conteniendo el esquema a crear.
      */
-    public JSONObject newScheme() {
-        launch(NewScheme.class);
-        return generatedJson;
+    public static void newScheme() {
+        new NewScheme().start(new Stage());
     }
 
     public JSONObject updateScheme(JSONObject actualScheme) {
