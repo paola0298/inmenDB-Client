@@ -6,12 +6,14 @@ import Gui.GUI;
 import Gui.NewData;
 import Gui.NewScheme;
 import Gui.querySchemeCollection;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -30,7 +32,7 @@ public class Controller {
     private Client client;
 
     private Hashtable<String, String> localSchemes;
-    private Hashtable<String, LinkedHashMap<String, String>> localCollections;
+    private Hashtable<String, Hashtable<String, String>> localCollections;
     private ObjectMapper mapper;
 
     /**
@@ -108,9 +110,11 @@ public class Controller {
                 Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
                 mainGui.loadSchemesList(updatedSchemes);
                 mainGui.showMessage("Esquema eliminado correctamente - " + getFinalTime(startTime));
-
                 localSchemes = updatedSchemes;
-                Hashtable<String, LinkedHashMap<String, String>> updateCollections = mapper.readValue(response.getString("collections"), Hashtable.class);
+
+
+                TypeReference<Hashtable<String, Hashtable<String, String>>> typeRef = new TypeReference<>() {} ;
+                Hashtable<String, Hashtable<String, String>> updateCollections = mapper.readValue(response.getString("collections"), typeRef);
                 localCollections = updateCollections;
 
             } catch (IOException e) {
@@ -220,7 +224,8 @@ public class Controller {
 
         if (response.get("status").equals("success")){
             try {
-                Hashtable<String, LinkedHashMap<String, String>> updateCollections = mapper.readValue(response.getString("collections"), Hashtable.class);
+                TypeReference<Hashtable<String, Hashtable<String, String>>> typeRef = new TypeReference<>() {} ;
+                Hashtable<String, Hashtable<String, String>> updateCollections = mapper.readValue(response.getString("collections"), typeRef);
                 localCollections = updateCollections;
 
 
@@ -255,7 +260,7 @@ public class Controller {
 
     }
 
-    public Hashtable<String, LinkedHashMap<String, String>> getLocalCollections() {
+    public Hashtable<String, Hashtable<String, String>> getLocalCollections() {
         System.out.println("local collections in controller " + localCollections);
         return localCollections;
     }
