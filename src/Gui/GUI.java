@@ -28,6 +28,7 @@ public class GUI extends Application{
     private VBox indexList;
     private TableView schemeDataTable;
     private Label actualSchemeName;
+    private VBox schemeDataContainer;
 
     public void start(Stage stage) {
         this.controller = Controller.getInstance();
@@ -123,7 +124,7 @@ public class GUI extends Application{
         mainWrapper.setContent(mainStack);
 
         //Contendor del contenido de esquemas
-        VBox schemeDataContainer = new VBox();
+        schemeDataContainer = new VBox();
         VBox.setVgrow(schemeDataContainer, Priority.ALWAYS);
         HBox.setHgrow(schemeDataContainer, Priority.ALWAYS);
         //Header de los esquemas
@@ -156,12 +157,20 @@ public class GUI extends Application{
         schemeDataHeader.getChildren().addAll(actualSchemeName, headerActions);
         //Tabla de datos del esquema
         schemeDataTable = new TableView();
-//        schemeDataTable.getColumns().add(new TableColumn<>("Columna 1"));
         VBox.setVgrow(schemeDataTable, Priority.ALWAYS);
         HBox.setHgrow(schemeDataTable, Priority.ALWAYS);
         schemeDataContainer.getChildren().addAll(schemeDataHeader, schemeDataTable);
 
-        mainStack.getChildren().addAll(schemeDataContainer);
+        VBox defaultContentContainer = new VBox();
+        defaultContentContainer.setAlignment(Pos.CENTER);
+        defaultContentContainer.setStyle("-fx-background-color: white;");
+        HBox.setHgrow(defaultContentContainer, Priority.ALWAYS);
+        VBox.setVgrow(defaultContentContainer, Priority.ALWAYS);
+        Label defaultContentText = new Label("Selecciona un esquema para ver sus datos");
+        defaultContentText.setStyle("-fx-font-size: 18px;");
+        defaultContentContainer.getChildren().add(defaultContentText);
+
+        mainStack.getChildren().addAll(schemeDataContainer, defaultContentContainer);
 
 
         mainLayout.setLeft(sidePanel);
@@ -209,6 +218,7 @@ public class GUI extends Application{
                         menu.hide();
                     }
                 } else {
+                    schemeDataContainer.toFront();
                     querySchemeData(schemeName);
                 }
             });
