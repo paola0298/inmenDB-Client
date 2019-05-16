@@ -1,4 +1,4 @@
-package GUI;
+package Gui;
 
 
 import javafx.application.Application;
@@ -6,30 +6,39 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
-import javax.swing.*;
-import java.awt.*;
-
-import static javafx.application.Application.launch;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
-public class NewData {
+public class NewData extends Application {
+    private JSONArray arrayJsonArray;
+    private String[] arrayLabel={"hola","adios", "Hello"};
+    private JSONObject scheme;
+    private JSONObject newRegister;
+    //Se define el array con su tamano
+    //private String[] array = new String[arrayJsonArray.length()];
+    //se accede a los campos del array usando indices
+//    array[0] = "dfg";
+//    public NewData(JSONObject scheme) {
+//        this.scheme = scheme;
+//        arrayJsonArray = scheme.getJSONArray("attrName");
+//        for(int i = 0; array.length() > i; i++){
+//            arrayLabel[i] = array[i];
+//            System.out.println(arrayLabel[i]);
+//        }
+//    }
+//
+ //   arrayLabel = {"h","o","l","a"};
 
-    public void start(Stage stage,String []arrayLabel ) {
+    @Override
+    public void start(Stage stage) {
         StackPane root = new StackPane();
         GridPane grid = new GridPane();
         grid.setBackground(new Background(new BackgroundFill(Color.web("#222831"), CornerRadii.EMPTY, Insets.EMPTY)));
@@ -69,6 +78,12 @@ public class NewData {
         stage.setScene(windowNewData);
         stage.show();
 
+    }
+
+    public JSONObject show() {
+        launch(NewData.class);
+
+        return newRegister;
     }
 
 }
