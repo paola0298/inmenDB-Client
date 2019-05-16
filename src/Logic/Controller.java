@@ -5,6 +5,7 @@ import Connection.Client;
 import Gui.GUI;
 import Gui.NewScheme;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
@@ -144,6 +145,17 @@ public class Controller {
 
     public String getActualSchemeName() {
         return mainGui.getSelectedSchemeName();
+    }
+
+    public JSONArray getSelectedScheme() {
+        String actualSchemeName = getActualSchemeName();
+        String actualScheme = localSchemes.get(actualSchemeName);
+        JSONObject actualSchemeObject = new JSONObject(actualScheme);
+        JSONArray attrName = actualSchemeObject.getJSONArray("attrName");
+
+        System.out.println("Attr name " + attrName);
+        return attrName;
+
     }
 
     /**
