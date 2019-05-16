@@ -2,7 +2,6 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -33,14 +32,12 @@ public class NewScheme extends Application {
 
     private static Controller controller;
     private static JSONObject generatedJson;
-    private static JSONObject editableJson;
+//    private static JSONObject editableJson;
 
     private ImageView addButton;
     private TextField schemeNameField;
     private ToggleGroup primaryKeyGroup;
 
-    private final int SCREEN_WIDTH = 600;
-    private final int SCREEN_HEIGHT = 400;
     private static boolean modifyScheme = false;
 
     /**
@@ -149,40 +146,40 @@ public class NewScheme extends Application {
 
         options.getChildren().addAll(leftContainer, cancel, accept);
 
-        if (modifyScheme) {
-            loadScheme(attrGrid);
-        }
+//        if (modifyScheme) {
+//            loadScheme(attrGrid);
+//        }
 
         mainLayout.setCenter(upperContainer);
         mainLayout.setBottom(options);
 
-        Scene scene = new Scene(mainLayout, SCREEN_WIDTH, SCREEN_HEIGHT);
+        Scene scene = new Scene(mainLayout, 600, 400);
 
         stage.setScene(scene);
         stage.setTitle("Crear nuevo esquema");
         stage.show();
     }
 
-    private void loadScheme(GridPane container) {
-        System.out.println("Window set to modify..");
-
-        schemeNameField.setText(editableJson.getString("name"));
-        schemeNameField.setEditable(false);
-
-        JSONArray names = editableJson.getJSONArray("attrName");
-        JSONArray types = editableJson.getJSONArray("attrType");
-        JSONArray sizes = editableJson.getJSONArray("attrSize");
-
-        int attrCount = editableJson.getInt("attrCount");
-        for (int i=0; i<attrCount; i++) {
-            String name = names.getString(i);
-
-            String type = types.getString(i);
-
-            int size = sizes.getInt(i);
-
-        }
-    }
+//    private void loadScheme(GridPane container) {
+//        System.out.println("Window set to modify..");
+//
+//        schemeNameField.setText(editableJson.getString("name"));
+//        schemeNameField.setEditable(false);
+//
+//        JSONArray names = editableJson.getJSONArray("attrName");
+//        JSONArray types = editableJson.getJSONArray("attrType");
+//        JSONArray sizes = editableJson.getJSONArray("attrSize");
+//
+//        int attrCount = editableJson.getInt("attrCount");
+//        for (int i=0; i<attrCount; i++) {
+//            String name = names.getString(i);
+//
+//            String type = types.getString(i);
+//
+//            int size = sizes.getInt(i);
+//
+//        }
+//    }
 
     /**
      * Éste método se encarga de mostrar una alerta al usuario.
@@ -206,7 +203,7 @@ public class NewScheme extends Application {
         attrName.setUserData("join");
         Label attrType = new Label("Join");
 
-        Hashtable<String, JSONObject> localSchemes = controller.getLocalSchemes();
+        Hashtable<String, String> localSchemes = controller.getLocalSchemes();
 
         ComboBox<String> schemeToSelect = new ComboBox<>();
         for (String scheme: localSchemes.keySet()){
@@ -219,6 +216,11 @@ public class NewScheme extends Application {
         if (container.getRowCount() == 1) {
             primary.setSelected(true);
         }
+
+        GridPane.setHalignment(attrName, HPos.CENTER);
+        GridPane.setHalignment(attrType, HPos.CENTER);
+        GridPane.setHalignment(schemeToSelect, HPos.CENTER);
+        GridPane.setHalignment(primary, HPos.CENTER);
 
         //TODO no mostrar el primary cuando se edita un esquema
         if (!modifyScheme) {
@@ -378,14 +380,14 @@ public class NewScheme extends Application {
             }
         }
 
-        scheme.put("hasJoin", hasJoin);
+//        scheme.put("hasJoin", hasJoin);
         scheme.put("attrName", nameArray);
         scheme.put("attrType", typeArray);
         scheme.put("attrSize", sizeArray);
         scheme.put("primaryKey", nameArray.getString(((Integer) primaryKeyGroup.getSelectedToggle().getUserData())-1));
-        scheme.put("attrCount", container.getRowCount()-1);
+//        scheme.put("attrCount", container.getRowCount()-1);
 
-        generatedJson.put("scheme", scheme);
+        generatedJson.put("scheme", scheme.toString());
 
         return !coincidences;
     }
@@ -436,15 +438,15 @@ public class NewScheme extends Application {
 
     /**
      * Método que muestra la ventana de creación de nuevo esquema.
-     * @return JSONObject conteniendo el esquema a crear.
      */
     public static void newScheme() {
         new NewScheme().start(new Stage());
     }
 
-    public JSONObject updateScheme(JSONObject actualScheme) {
+//    public JSONObject updateScheme(JSONObject actualScheme) {
+    public JSONObject updateScheme() {
         modifyScheme = true;
-        editableJson = actualScheme;
+//        editableJson = actualScheme;
         launch(NewScheme.class);
         return generatedJson;
     }

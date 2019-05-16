@@ -43,6 +43,7 @@ public class Client {
         } else {
             JSONObject obj = new JSONObject();
             obj.put("status", "CONNECTION_REFUSED");
+            obj.put("error", "no_connection");
             return obj;
         }
     }
@@ -67,7 +68,9 @@ public class Client {
     private JSONObject getData() {
         try {
             DataInputStream is = new DataInputStream(this.clientSocket.getInputStream());
-            return new JSONObject(is.readUTF());
+            String data = is.readUTF();
+            System.out.println("Data from server: \n" + data);
+            return new JSONObject(data);
         } catch (IOException e) {
             System.out.println("Error getting data: " + e.getMessage());
             JSONObject err = new JSONObject();

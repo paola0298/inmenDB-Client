@@ -4,6 +4,7 @@ import Connection.Client;
 
 import Gui.GUI;
 import Gui.NewScheme;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
@@ -23,15 +24,15 @@ public class Controller {
     private GUI mainGui;
     private Client client;
 
-    private Hashtable<String, JSONObject> localSchemes;
+    private Hashtable<String, String> localSchemes;
+    private ObjectMapper mapper;
 
     /**
      * Constructor por defecto de Controller.
      */
     private Controller() {
         this.localSchemes = new Hashtable<>();
-        this.localSchemes.put("Persona", new JSONObject());
-        this.localSchemes.put("Carro", new JSONObject());
+        this.mapper = new ObjectMapper();
         initialize();
     }
 
@@ -62,33 +63,82 @@ public class Controller {
     public void sendScheme(JSONObject schemeToSend) {
         System.out.println(schemeToSend.toString());
 
-//        JSONObject response = client.connect(schemeToSend);
-        JSONObject response = new JSONObject();
-        response.put("status", "SUCCESS");
+        double startTime = System.currentTimeMillis();
 
-        //TODO recibir el hashtable con los esquemas y deserializarlo
+        JSONObject response = client.connect(schemeToSend);
 
-        if (response.getString("status").equals("SUCCESS")) {
-            //Test
-            localSchemes = new Hashtable<>();
-            localSchemes.put("Curso", new JSONObject());
-            localSchemes.put("Universidad", new JSONObject());
-            //
-            mainGui.loadSchemesList(localSchemes);
-            mainGui.showMessage("Esquema añadido!");
+        if (response.getString("status").equals("success")) {
+            try {
+                @SuppressWarnings("unchecked")
+                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
+                mainGui.loadSchemesList(updatedSchemes);
+                mainGui.showMessage("Esquema añadido correctamente - " + getFinalTime(startTime));
+                localSchemes = updatedSchemes;
+            } catch (IOException e) {
+                mainGui.showMessage(e.getMessage() + " - " + getFinalTime(startTime));
+            }
         } else {
-
+            if (response.getString("error").equals("Already exists")) {
+                mainGui.loadSchemesList(localSchemes);
+                mainGui.showMessage("El esquema ya existe - " + getFinalTime(startTime));
+            } else {
+                mainGui.showMessage("No se pudo crear el esquema - " + getFinalTime(startTime));
+            }
         }
     }
 
-    public void updateScheme(JSONObject scheme) {
-        NewScheme win = new NewScheme();
-        JSONObject action = win.updateScheme(scheme);
-
-        System.out.println(action.toString(2));
+    private String getFinalTime(double startTime) {
+        return (System.currentTimeMillis() - startTime) / 1000 + " s";
     }
 
-    public void queryScheme(String schemeName) {
+    public void querySchemes() {
+        double startTime = System.currentTimeMillis();
+
+        JSONObject action = new JSONObject();
+        action.put("action", "querySchemes");
+
+        JSONObject response = client.connect(action);
+
+        if (response.getString("status").equals("success")) {
+            try {
+                @SuppressWarnings("unchecked")
+                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
+                mainGui.loadSchemesList(updatedSchemes);
+                mainGui.showMessage("Esquemas cargados correctamente - " + getFinalTime(startTime));
+                localSchemes = updatedSchemes;
+
+            } catch (IOException e) {
+                mainGui.showMessage("Error al recibir los esquemas - " + getFinalTime(startTime));
+            }
+        } else {
+            mainGui.showMessage("No se pudieron recuperar los esquemas - " + getFinalTime(startTime));
+        }
+    }
+
+    public void querySchemeData(String schemeName) {
+
+        double time = System.currentTimeMillis();
+
+        JSONObject action = new JSONObject();
+        action.put("action", "getSchemeData");
+        action.put("schemeName", schemeName);
+
+        JSONObject response = client.connect(action);
+
+        if (response.getString("status").equals("success")) {
+            try {
+                Hashtable<String, JSONObject> registers = mapper.readValue(response.getString("collection"), Hashtable.class);
+                mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")));
+                mainGui.loadDataToTable(registers);
+
+                mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(time));
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+
+        }
 
     }
 
@@ -97,7 +147,7 @@ public class Controller {
      *
      * @return HashTable de esquemas.
      */
-    public Hashtable<String, JSONObject> getLocalSchemes() {
+    public Hashtable<String, String> getLocalSchemes() {
         return localSchemes;
     }
 
