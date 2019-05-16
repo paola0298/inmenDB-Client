@@ -272,7 +272,7 @@ public class ServerClientTest {
         System.out.println("\n");
 
         System.out.println("Consultado... ");
-        JSONObject query1 = test.queryScheme("Persona", "Nombre", false, null, null,
+        JSONObject query1 = test.queryScheme("Estudiante", "Nombre", false, null, null,
                 false, "Paola");
         JSONObject responseQuery = client.connect(query1);
         System.out.println(responseQuery);
