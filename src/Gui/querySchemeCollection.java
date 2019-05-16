@@ -37,8 +37,10 @@ public class querySchemeCollection extends Application {
      */
     @Override
     public void start(Stage stage) {
+
         generatedJson = new JSONObject();
         join = false;
+
         this.controller = Controller.getInstance();
 
         VBox container = new VBox();
@@ -66,6 +68,7 @@ public class querySchemeCollection extends Application {
 
         schemeAttr.setOnMouseClicked(mouseEvent -> {
             //TODO ver si hay join y si lo hay colocar un nuevo combobox con los atributos del join
+
             controller.getSelectedScheme();
         });
         VBox attrVBox = new VBox();
@@ -183,6 +186,7 @@ public class querySchemeCollection extends Application {
         return new Image("file://" + cwd + "/" + relativePath);
     }
 
+
     /**
      * Éste método se encarga de mostrar una alerta al usuario.
      * @param message Mensaje de la alerta.
@@ -193,7 +197,6 @@ public class querySchemeCollection extends Application {
         alert.setHeaderText(null);
         alert.show();
     }
-
 
     public static void queryScheme() {
         new querySchemeCollection().start(new Stage());
