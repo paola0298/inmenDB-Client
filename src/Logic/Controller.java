@@ -4,6 +4,7 @@ import Connection.Client;
 
 import Gui.GUI;
 import Gui.NewScheme;
+import Gui.querySchemeCollection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -155,6 +156,28 @@ public class Controller {
 
         System.out.println("Attr name " + attrName);
         return attrName;
+
+    }
+
+    public void querySchemeCollection() {
+        querySchemeCollection.queryScheme();
+    }
+
+    public void sendQuery(JSONObject queryToSend) {
+
+        double startTime = System.currentTimeMillis();
+
+        JSONObject response = client.connect(queryToSend);
+
+        if (response.getString("status").equals("success")) {
+            System.out.println(response);
+
+        } else {
+            System.out.println(response);
+
+
+        }
+
 
     }
 
