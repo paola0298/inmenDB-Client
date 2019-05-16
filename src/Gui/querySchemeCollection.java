@@ -65,7 +65,7 @@ public class querySchemeCollection extends Application {
         Text schemeAttrText = new Text("Seleccione la columna");
         ComboBox<String> schemeAttr = new ComboBox<>();
 
-        JSONArray attrNames =  controller.getSelectedScheme();
+        JSONArray attrNames =  controller.getSelectedSchemeAttr();
         for (int i=0; i<attrNames.length(); i++) {
             schemeAttr.getItems().add(attrNames.getString(i));
         }
