@@ -132,8 +132,28 @@ public class GUI extends Application{
         schemeDataHeader.setPadding(new Insets(10));
         actualSchemeName = new Label("Selecciona un esquema");
         actualSchemeName.setStyle("-fx-font-size: 18px;");
-        //TODO agregar botón para agregar y buscar datos.
-        schemeDataHeader.getChildren().add(actualSchemeName);
+        //Contenedor de los botones de buscar y añadir registros
+        HBox headerActions = new HBox();
+        headerActions.setAlignment(Pos.CENTER_RIGHT);
+        headerActions.setSpacing(10);
+        HBox.setHgrow(headerActions, Priority.ALWAYS);
+        ImageView addRegisterButton = new ImageView(loadImg("res/images/plus.png"));
+        addRegisterButton.setFitWidth(28);
+        addRegisterButton.setFitHeight(28);
+        addRegisterButton.setOnMouseClicked(mouseEvent -> {
+            //TODO añadir funcionalidad para agregar registros
+            System.out.println("Add register in " + actualSchemeName.getText());
+
+        });
+        ImageView searchButton =  new ImageView(loadImg("res/images/search.png"));
+        searchButton.setFitWidth(28);
+        searchButton.setFitHeight(28);
+        searchButton.setOnMouseClicked(mouseEvent -> {
+            //TODO añadir funcionalidad para buscar en la colección de un esquema
+            System.out.println("Search in scheme " + actualSchemeName.getText());
+        });
+        headerActions.getChildren().addAll(addRegisterButton, searchButton);
+        schemeDataHeader.getChildren().addAll(actualSchemeName, headerActions);
         //Tabla de datos del esquema
         schemeDataTable = new TableView();
 //        schemeDataTable.getColumns().add(new TableColumn<>("Columna 1"));
