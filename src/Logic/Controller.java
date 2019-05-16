@@ -3,6 +3,7 @@ package Logic;
 import Connection.Client;
 
 import Gui.GUI;
+import Gui.NewData;
 import Gui.NewScheme;
 import Gui.querySchemeCollection;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +12,9 @@ import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 /**
@@ -27,6 +30,7 @@ public class Controller {
     private Client client;
 
     private Hashtable<String, String> localSchemes;
+    private Hashtable<String, LinkedHashMap<String, String>> localCollections;
     private ObjectMapper mapper;
 
     /**
@@ -34,6 +38,7 @@ public class Controller {
      */
     private Controller() {
         this.localSchemes = new Hashtable<>();
+        this.localCollections = new Hashtable<>();
         this.mapper = new ObjectMapper();
         initialize();
     }
@@ -89,6 +94,37 @@ public class Controller {
         }
     }
 
+    public void deleteScheme(String schemeName) {
+        JSONObject toSend = new JSONObject();
+        toSend.put("action", "deleteScheme");
+        toSend.put("scheme", schemeName);
+
+        double startTime = System.currentTimeMillis();
+
+        JSONObject response = client.connect(toSend);
+
+        if (response.getString("status").equals("success")) {
+            try {
+                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
+                mainGui.loadSchemesList(updatedSchemes);
+                mainGui.showMessage("Esquema eliminado correctamente - " + getFinalTime(startTime));
+
+                localSchemes = updatedSchemes;
+                Hashtable<String, LinkedHashMap<String, String>> updateCollections = mapper.readValue(response.getString("collections"), Hashtable.class);
+                localCollections = updateCollections;
+
+            } catch (IOException e) {
+                mainGui.showMessage(e.getMessage() + " - " + getFinalTime(startTime));
+            }
+        } else {
+            if (response.getString("error").equals("join")) {
+                mainGui.showMessage("El esquema no se puede eliminar ya que hay un join - " + getFinalTime(startTime));
+            } else {
+                mainGui.showMessage("No se pudo eliminar el esquema - " + getFinalTime(startTime));
+            }
+        }
+    }
+
     private String getFinalTime(double startTime) {
         return (System.currentTimeMillis() - startTime) / 1000 + " s";
     }
@@ -129,7 +165,7 @@ public class Controller {
 
         if (response.getString("status").equals("success")) {
             try {
-                Hashtable<String, JSONObject> registers = mapper.readValue(response.getString("collection"), Hashtable.class);
+                Hashtable<String, String> registers = mapper.readValue(response.getString("collection"), Hashtable.class);
                 mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")));
                 mainGui.loadDataToTable(registers);
 
@@ -148,7 +184,7 @@ public class Controller {
         return mainGui.getSelectedSchemeName();
     }
 
-    public JSONArray getSelectedScheme() {
+    public JSONArray getSelectedSchemeAttr() {
         String actualSchemeName = getActualSchemeName();
         String actualScheme = localSchemes.get(actualSchemeName);
         JSONObject actualSchemeObject = new JSONObject(actualScheme);
@@ -159,8 +195,46 @@ public class Controller {
 
     }
 
+    public JSONObject getSelectedScheme() {
+        String actualSchemeName = getActualSchemeName();
+        String actualScheme = localSchemes.get(actualSchemeName);
+
+        return new JSONObject(actualScheme);
+
+    }
+
+
     public void querySchemeCollection() {
         querySchemeCollection.queryScheme();
+    }
+
+    public void insertData() { NewData.newData(); }
+
+    public void insertData(JSONObject dataToInsert) {
+
+        double startTime = System.currentTimeMillis();
+
+        JSONObject response = client.connect(dataToInsert);
+
+        System.out.println("response inserting data " + response);
+
+        if (response.get("status").equals("success")){
+            try {
+                Hashtable<String, LinkedHashMap<String, String>> updateCollections = mapper.readValue(response.getString("collections"), Hashtable.class);
+                localCollections = updateCollections;
+
+
+            } catch (IOException e) {
+                mainGui.showMessage(e.getMessage() + " - " + getFinalTime(startTime));
+            }
+        } else {
+            if (response.getString("error").equals("No exists")) {
+                mainGui.showMessage("El esquema no existe - " + getFinalTime(startTime));
+            } else {
+                mainGui.showMessage("No se pudo crear la coleccion de datos - " + getFinalTime(startTime));
+            }
+        }
+
     }
 
     public void sendQuery(JSONObject queryToSend) {
@@ -179,6 +253,11 @@ public class Controller {
         }
 
 
+    }
+
+    public Hashtable<String, LinkedHashMap<String, String>> getLocalCollections() {
+        System.out.println("local collections in controller " + localCollections);
+        return localCollections;
     }
 
     /**
@@ -206,5 +285,4 @@ public class Controller {
             System.out.println("[Error] Could not read settings");
         }
     }
-
 }
