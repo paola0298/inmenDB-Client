@@ -152,6 +152,7 @@ public class GUI extends Application{
         searchButton.setOnMouseClicked(mouseEvent -> {
             //TODO añadir funcionalidad para buscar en la colección de un esquema
             System.out.println("Search in scheme " + actualSchemeName.getText());
+            controller.querySchemeCollection();
         });
         headerActions.getChildren().addAll(addRegisterButton, searchButton);
         schemeDataHeader.getChildren().addAll(actualSchemeName, headerActions);
