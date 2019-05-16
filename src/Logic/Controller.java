@@ -142,6 +142,10 @@ public class Controller {
 
     }
 
+    public String getActualSchemeName() {
+        return mainGui.getSelectedSchemeName();
+    }
+
     /**
      * Método para obtener el HashTable local de esquemas.
      *

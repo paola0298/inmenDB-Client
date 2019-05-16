@@ -240,6 +240,10 @@ public class GUI extends Application{
 
     }
 
+    public String getSelectedSchemeName() {
+        return actualSchemeName.getText();
+    }
+
     /**
      * Método encargado de cargar una imagen desde la ruta especificada.
      * @param relativePath Ruta relativa de la imagen.
