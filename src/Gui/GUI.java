@@ -144,6 +144,7 @@ public class GUI extends Application{
         addRegisterButton.setOnMouseClicked(mouseEvent -> {
             //TODO añadir funcionalidad para agregar registros
             System.out.println("Add register in " + actualSchemeName.getText());
+            controller.insertData();
 
         });
         ImageView searchButton =  new ImageView(loadImg("res/images/search.png"));
@@ -220,6 +221,7 @@ public class GUI extends Application{
                     }
                 } else {
                     schemeDataContainer.toFront();
+                    System.out.println("Consultando datos del esquema");
                     querySchemeData(schemeName);
                 }
             });
@@ -240,6 +242,7 @@ public class GUI extends Application{
     private void deleteScheme(String schemeName) {
         //TODO mandar solicitud al servidor para eliminar esquema
         System.out.println("Eliminar esquema " + schemeName);
+        controller.deleteScheme(schemeName);
     }
 
     private void querySchemeData(String schemeName) {
@@ -265,9 +268,10 @@ public class GUI extends Application{
 
     }
 
-    public void loadDataToTable(Hashtable<String, JSONObject> collection) {
+    public void loadDataToTable(Hashtable<String, String> collection) {
         //TODO meter los datos a las columnas de la tabla
         System.out.println("Añadiendo datos");
+        System.out.println(collection);
 
     }
 
