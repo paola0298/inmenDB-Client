@@ -36,7 +36,6 @@ public class NewData extends Application {
         join = false;
 
         StackPane root = new StackPane();
-//        GridPane container = new GridPane();
         HBox container = new HBox();
         VBox labels = new VBox();
         VBox text = new VBox();
@@ -50,10 +49,8 @@ public class NewData extends Application {
 
         container.setAlignment(Pos.CENTER);
         container.setSpacing(10);
-//        container.setHgap(15);
-//        container.setVgap(15);
 
-        JSONObject actualScheme = controller.getSelectedScheme();
+        JSONObject actualScheme = controller.getSelectedScheme(); //estructura
 
         JSONArray attrNames =  controller.getSelectedSchemeAttr();
         JSONArray attrType = actualScheme.getJSONArray("attrType");
@@ -61,8 +58,11 @@ public class NewData extends Application {
 
         String actualSchemeName = controller.getActualSchemeName();
         Hashtable<String, String> localSchemes = controller.getLocalSchemes();
-        Hashtable<String, LinkedHashMap<String, String>> localCollections =  controller.getLocalCollections();
+        Hashtable<String, Hashtable<String, String>> localCollections =  controller.getLocalCollections(); //TODO LinkedHashMap
 
+        Hashtable<String, String> actualCollectionScheme = localCollections.get(controller.getActualSchemeName());
+
+        //agregar datos a combobox
 
         for(int i=0; i < attrNames.length(); i++){
             Label attribute = new Label();
@@ -87,7 +87,7 @@ public class NewData extends Application {
                         String schemeSelected = schemes.getValue();
                         System.out.println("Scheme selected " + schemeSelected);
                         System.out.println("local collections " + localCollections);
-                        LinkedHashMap<String, String> actualCollection = localCollections.get(schemeSelected);
+                        Hashtable<String, String> actualCollection = localCollections.get(schemeSelected);
 
                         for (String id : actualCollection.keySet()) {
                             collections.getItems().add(id);
@@ -95,8 +95,6 @@ public class NewData extends Application {
 
                         text.getChildren().add(collections);
                     });
-
-                    //TODO colocar todas las colecciones de datos del esquema elegido
 
                 } else {
                     showAlert("Es necesario que hayan colecciones de datos de los joins con que se encuentra " +
@@ -120,8 +118,12 @@ public class NewData extends Application {
             System.out.println("Saving records...");
             System.out.println(generatedJson);
 
+            //TODO verificar que no hayan pk repetidas
             JSONArray attr = new JSONArray();
             String attribute = "";
+
+            String pk = ""; //TODO get pk of actual register to be saved
+
             for (int i=0; i<text.getChildren().size(); i++) {
                 if (!join) {
                     TextField data = (TextField) text.getChildren().get(i);
@@ -135,6 +137,16 @@ public class NewData extends Application {
                         i++;
                         ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
                         attribute = collectionId.getValue();
+                    }
+                }
+
+                if (attribute.equals(pk)){
+                    //TODO verificar con las demas pk de las otras colecciones de ese esquema
+                    for (String key : actualCollectionScheme.keySet()){
+                        if (key.equals(attribute)){
+                            showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
+                            return;
+                        }
                     }
                 }
 
