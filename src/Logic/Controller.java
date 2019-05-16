@@ -4,8 +4,6 @@ import Connection.Client;
 
 import Gui.GUI;
 import Gui.NewScheme;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 
@@ -118,11 +116,30 @@ public class Controller {
     }
 
     public void querySchemeData(String schemeName) {
+
+        double time = System.currentTimeMillis();
+
         JSONObject action = new JSONObject();
         action.put("action", "getSchemeData");
         action.put("schemeName", schemeName);
 
-        //TODO procesar los datos recibidos del servidor
+        JSONObject response = client.connect(action);
+
+        if (response.getString("status").equals("success")) {
+            try {
+                Hashtable<String, JSONObject> registers = mapper.readValue(response.getString("collection"), Hashtable.class);
+                mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")));
+                mainGui.loadDataToTable(registers);
+
+                mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(time));
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+
+        }
+
     }
 
     /**
