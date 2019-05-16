@@ -16,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -37,9 +38,6 @@ public class querySchemeCollection extends Application {
      */
     @Override
     public void start(Stage stage) {
-
-        generatedJson = new JSONObject();
-        join = false;
 
         generatedJson = new JSONObject();
         join = false;
@@ -67,13 +65,19 @@ public class querySchemeCollection extends Application {
         Text schemeAttrText = new Text("Seleccione la columna");
         ComboBox<String> schemeAttr = new ComboBox<>();
 
-        //TODO colocar los atributos segun el esquema
+        JSONArray attrNames =  controller.getSelectedScheme();
+        for (int i=0; i<attrNames.length(); i++) {
+            schemeAttr.getItems().add(attrNames.getString(i));
+        }
 
-        schemeAttr.setOnMouseClicked(mouseEvent -> {
-            //TODO ver si hay join y si lo hay colocar un nuevo combobox con los atributos del join
+//        schemeAttr.setOnMouseClicked(mouseEvent -> {
+//            //TODO colocar los atributos segun el esquema
+//
+//
+//        });
 
-            controller.getSelectedScheme();
-        });
+        //TODO ver si hay join y si lo hay colocar un nuevo combobox con los atributos del join
+
         VBox attrVBox = new VBox();
         attrVBox.setAlignment(Pos.CENTER);
         attrVBox.setSpacing(5);
@@ -94,6 +98,7 @@ public class querySchemeCollection extends Application {
         //Indicar si se desea buscar por indice
         Text indexText = new Text("Seleccione el indice por el cual \n   desea realizar la búsqueda");
         ComboBox<String> actualIndex = new ComboBox<>();
+        actualIndex.getItems().add("NO");
         //TODO colocar esquemas existentes de la columna seleccionada
         VBox indexVBox = new VBox();
         indexVBox.setAlignment(Pos.CENTER);
@@ -113,25 +118,26 @@ public class querySchemeCollection extends Application {
             String indexComboBox = actualIndex.getValue();
             String joinCombobox = "";
 
-            if (!attrComboBox.equals("")){
+
+            if (attrComboBox != null){
                 if (!join){
                     //TODO asignar valor a joinCombobox
-                    joinCombobox = "hola";
+                    joinCombobox = "";
                 }
-                if (!attrEntryText.equals("")){
-                    if (!indexComboBox.equals("")){
+                if (!attrEntryText.isBlank()){
+                    if (indexComboBox != null){
 
                         System.out.println("Enviando datos al servidor");
                         generatedJson.put("action", "queryData");
                         JSONObject parameters = new JSONObject();
                         parameters.put("scheme", controller.getActualSchemeName());
-                        if (!joinCombobox.equals("")){
+                        if (!joinCombobox.isBlank()){ //TODO cambiar condicion por joinCombobox!=null
                             parameters.put("searchByJoin", true);
 //                            parameters.put("searchBy", attrComboBox);
                             //TODO colocar como searchBy el atributo correspondiente al join
                         } else {
-                            parameters.put("searchByJoin", false);
                             parameters.put("searchBy", attrComboBox);
+                            parameters.put("searchByJoin", false);
                         }
                         parameters.put("dataToSearch", attrEntryText);
                         if (indexComboBox.equals("NO")) {
@@ -141,6 +147,9 @@ public class querySchemeCollection extends Application {
                             parameters.put("index", true);
                             parameters.put("tree", indexComboBox);
                         }
+
+                        generatedJson.put("parameters", parameters.toString());
+                        controller.sendQuery(generatedJson);
 
 
                     } else {
