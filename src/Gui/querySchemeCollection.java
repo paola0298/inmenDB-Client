@@ -5,6 +5,8 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -14,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 
 /**
  * Clase que muestra la interfaz necesaria para realizar busquedas en los esquemas creados
@@ -23,6 +26,8 @@ import javafx.stage.Stage;
 
 public class querySchemeCollection extends Application {
     private static Controller controller;
+    private boolean join;
+    private JSONObject generatedJson;
     private final int SCREEN_WIDTH = 600;
     private final int SCREEN_HEIGHT = 400;
 
@@ -32,6 +37,8 @@ public class querySchemeCollection extends Application {
      */
     @Override
     public void start(Stage stage) {
+        generatedJson = new JSONObject();
+        join = false;
         this.controller = Controller.getInstance();
 
         VBox container = new VBox();
@@ -54,10 +61,12 @@ public class querySchemeCollection extends Application {
         //Seleccionar el atributo
         Text schemeAttrText = new Text("Seleccione la columna");
         ComboBox<String> schemeAttr = new ComboBox<>();
+
         //TODO colocar los atributos segun el esquema
 
         schemeAttr.setOnMouseClicked(mouseEvent -> {
             //TODO ver si hay join y si lo hay colocar un nuevo combobox con los atributos del join
+            controller.getSelectedScheme();
         });
         VBox attrVBox = new VBox();
         attrVBox.setAlignment(Pos.CENTER);
@@ -94,6 +103,51 @@ public class querySchemeCollection extends Application {
         searchButton.setFitHeight(40);
         searchButton.setOnMouseClicked(event -> {
             String attrEntryText = attrEntry.getText();
+            String attrComboBox = schemeAttr.getValue();
+            String indexComboBox = actualIndex.getValue();
+            String joinCombobox = "";
+
+            if (!attrComboBox.equals("")){
+                if (!join){
+                    //TODO asignar valor a joinCombobox
+                    joinCombobox = "hola";
+                }
+                if (!attrEntryText.equals("")){
+                    if (!indexComboBox.equals("")){
+
+                        System.out.println("Enviando datos al servidor");
+                        generatedJson.put("action", "queryData");
+                        JSONObject parameters = new JSONObject();
+                        parameters.put("scheme", controller.getActualSchemeName());
+                        if (!joinCombobox.equals("")){
+                            parameters.put("searchByJoin", true);
+//                            parameters.put("searchBy", attrComboBox);
+                            //TODO colocar como searchBy el atributo correspondiente al join
+                        } else {
+                            parameters.put("searchByJoin", false);
+                            parameters.put("searchBy", attrComboBox);
+                        }
+                        parameters.put("dataToSearch", attrEntryText);
+                        if (indexComboBox.equals("NO")) {
+                            parameters.put("index", false);
+                        }
+                        else {
+                            parameters.put("index", true);
+                            parameters.put("tree", indexComboBox);
+                        }
+
+
+                    } else {
+                        showAlert("Debe seleccionar algun indice para realizar una busqueda, o NO en caso de" +
+                                "que no desee usar indices", Alert.AlertType.ERROR);
+                    }
+                } else {
+                    showAlert("Debe ingresar un dato para buscarlo", Alert.AlertType.ERROR);
+                }
+            } else {
+                showAlert("Debe seleccionar una columna", Alert.AlertType.ERROR);
+            }
+
             System.out.println("Buscando registros para " + attrEntryText);
         });
 
@@ -127,6 +181,17 @@ public class querySchemeCollection extends Application {
     private Image loadImg(String relativePath) {
         String cwd = System.getProperty("user.dir");
         return new Image("file://" + cwd + "/" + relativePath);
+    }
+
+    /**
+     * Éste método se encarga de mostrar una alerta al usuario.
+     * @param message Mensaje de la alerta.
+     * @param type Tipo de alerta (Info, Error..).
+     */
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type, message, ButtonType.OK);
+        alert.setHeaderText(null);
+        alert.show();
     }
 
 
