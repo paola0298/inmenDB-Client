@@ -204,7 +204,9 @@ public class Controller {
                 Hashtable<String, JSONArray> collection = mapper.readValue(response.getString("collection"), typeReference);
 
                 System.out.println("Colección a cargar: " + collection);
+
                 mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")), collection);
+
 //                if (collection != null) {
 //                    mainGui.loadDataToTable(collection);
 //                }

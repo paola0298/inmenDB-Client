@@ -228,6 +228,11 @@ public class GUI extends Application{
 
             this.controller.deleteRecords(primaryKeys);
 
+        } else {
+            Alert alert = new Alert(
+                    Alert.AlertType.INFORMATION, "Primero selecciona los registros a eliminar", ButtonType.OK);
+            alert.setHeaderText(null);
+            alert.show();
         }
     }
 
@@ -298,6 +303,10 @@ public class GUI extends Application{
         System.out.println("Cargando columnas");
 
         schemeDataTable.getColumns().clear();
+
+        if (collection == null) {
+            collection = new Hashtable<>();
+        }
 
         // [cedula, nombre, edad]
         JSONArray attributes = scheme.getJSONArray("attrName");
