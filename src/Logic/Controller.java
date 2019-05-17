@@ -251,7 +251,11 @@ public class Controller {
         JSONObject response = client.connect(queryToSend);
 
         if (response.getString("status").equals("success")) {
-            System.out.println(response);
+            JSONObject schemeData = new JSONObject(response.getString("scheme"));
+            JSONObject joinsData = new JSONObject(response.getString("join"));
+
+            System.out.println(schemeData.toString(2));
+            System.out.println(joinsData.toString(2));
 
         } else {
             System.out.println(response);
