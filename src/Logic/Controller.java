@@ -220,13 +220,15 @@ public class Controller {
 
         JSONObject response = client.connect(dataToInsert);
 
-        System.out.println("response inserting data " + response);
+        System.out.println("response inserting data " + response.toString(2));
 
         if (response.get("status").equals("success")){
             try {
                 TypeReference<Hashtable<String, Hashtable<String, String>>> typeRef = new TypeReference<>() {} ;
                 Hashtable<String, Hashtable<String, String>> updateCollections = mapper.readValue(response.getString("collections"), typeRef);
                 localCollections = updateCollections;
+                //TODO agregar a tableview
+                mainGui.showMessage("Registro agregado correctamente - " + getFinalTime(startTime));
 
 
             } catch (IOException e) {
