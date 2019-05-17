@@ -222,7 +222,6 @@ public class NewScheme extends Application {
         GridPane.setHalignment(schemeToSelect, HPos.CENTER);
         GridPane.setHalignment(primary, HPos.CENTER);
 
-        //TODO no mostrar el primary cuando se edita un esquema
         if (!modifyScheme) {
             ImageView delete = new ImageView(loadImg("res/images/delete.png"));
             delete.setFitWidth(25);
@@ -308,7 +307,7 @@ public class NewScheme extends Application {
     private void refreshGrid(GridPane container) {
         int columnCount = container.getColumnCount();
         for (int row=0; row<container.getRowCount()-1; row++) {
-            //TODO column count -> 5
+
             for (int column=0; column<columnCount; column++) {
                 int index = ((row*columnCount)+column);
 
@@ -330,18 +329,16 @@ public class NewScheme extends Application {
         generatedJson.put("action", "createScheme");
 
         JSONObject scheme = new JSONObject();
-        scheme.put("name", schemeNameField.getText());
+        scheme.put("name", schemeNameField.getText().replaceAll(" ", ""));
 
         JSONArray nameArray = new JSONArray();
         JSONArray typeArray = new JSONArray();
         JSONArray sizeArray = new JSONArray();
 
-        boolean hasJoin = false;
-
         int columnCount = container.getColumnCount();
 
         for (int row=1; row<container.getRowCount(); row++) {
-            //TODO column count -> 5
+
             TextField nameWidget = (TextField) container.getChildren().get(row*columnCount);
             String typeFlag = (String) nameWidget.getUserData();
 
@@ -362,10 +359,10 @@ public class NewScheme extends Application {
 
             } else {
                 typeArray.put("join");
-                hasJoin = true;
                 @SuppressWarnings("unchecked")
                 ComboBox<String> schemeToJoin = (ComboBox<String>) container.getChildren().get(row*columnCount+2);
                 sizeArray.put(schemeToJoin.getSelectionModel().getSelectedItem());
+                System.out.println("[NewScheme] Join value: " + schemeToJoin.getSelectionModel().getSelectedItem() + ".");
             }
         }
 
