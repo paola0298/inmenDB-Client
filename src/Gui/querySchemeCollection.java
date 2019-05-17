@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Hashtable;
+
 /**
  * Clase que muestra la interfaz necesaria para realizar busquedas en los esquemas creados
  * @author paola
@@ -60,30 +62,35 @@ public class querySchemeCollection extends Application {
         button.setPadding(new Insets(5, 5, 5, 20));
 
 
-
         //Seleccionar el atributo
         Text schemeAttrText = new Text("Seleccione la columna");
         ComboBox<String> schemeAttr = new ComboBox<>();
+
+        Text joinAttrText = new Text("Seleccione la columna del join");
+        ComboBox<String> joinAttrComboBox = new ComboBox<>();
 
         JSONArray attrNames =  controller.getSelectedSchemeAttr();
         for (int i=0; i<attrNames.length(); i++) {
             schemeAttr.getItems().add(attrNames.getString(i));
         }
 
-//        schemeAttr.setOnMouseClicked(mouseEvent -> {
-//            //TODO colocar los atributos segun el esquema
-//
-//
-//        });
+        JSONObject actualSchemeStructure = controller.getSelectedScheme();
+        JSONArray attrSize = actualSchemeStructure.getJSONArray("attrSize");
+        JSONArray attrType = actualSchemeStructure.getJSONArray("attrType");
+        Hashtable<String, String> localSchemes = controller.getLocalSchemes();
 
-        //TODO ver si hay join y si lo hay colocar un nuevo combobox con los atributos del join
+
+
+        VBox joinVBox = new VBox();
+        joinVBox.setAlignment(Pos.CENTER);
+        joinVBox.setSpacing(5);
+        joinVBox.setPadding(new Insets(5));
 
         VBox attrVBox = new VBox();
         attrVBox.setAlignment(Pos.CENTER);
         attrVBox.setSpacing(5);
         attrVBox.setPadding(new Insets(5));
         attrVBox.getChildren().addAll(schemeAttrText, schemeAttr);
-
 
         //Colocar lo que se desea buscar
         Text toSearch = new Text("Ingrese el dato a buscar");
@@ -94,12 +101,55 @@ public class querySchemeCollection extends Application {
         toSearchVBox.setPadding(new Insets(5));
         toSearchVBox.getChildren().addAll(toSearch, attrEntry);
 
+        attrBox.getChildren().add(attrVBox);
+
+        schemeAttr.setOnAction(actionEvent -> {
+            join = false;
+
+            int size = attrBox.getChildren().size();
+
+
+            if (size>1) {
+                attrBox.getChildren().remove(toSearchVBox);
+                attrBox.getChildren().remove(joinVBox);
+                joinVBox.getChildren().clear();
+            }
+
+
+            int indexAttr = schemeAttr.getSelectionModel().getSelectedIndex();
+            String atType = attrType.getString(indexAttr);
+            String atJoin = null;
+            if (atType.equals("join")){
+                atJoin = attrSize.getString(indexAttr);
+                System.out.println("La columna seleccionada es de tipo join");
+                join = true;
+            }
+
+            if (join) {
+                if (atJoin!=null){
+                    JSONObject schemeSelected = new JSONObject(localSchemes.get(atJoin));
+                    System.out.println(schemeSelected);
+                    JSONArray attrNameJoin = schemeSelected.getJSONArray("attrName");
+
+                    for (int j = 0; j < attrNameJoin.length(); j++) {
+                        joinAttrComboBox.getItems().add(attrNameJoin.getString(j));
+                    }
+                    joinVBox.getChildren().addAll(joinAttrText, joinAttrComboBox);
+                    attrBox.getChildren().add(joinVBox);
+                }
+            }
+            attrBox.getChildren().add(toSearchVBox);
+
+
+        });
+
+
 
         //Indicar si se desea buscar por indice
         Text indexText = new Text("Seleccione el indice por el cual \n   desea realizar la búsqueda");
         ComboBox<String> actualIndex = new ComboBox<>();
         actualIndex.getItems().add("NO");
-        //TODO colocar esquemas existentes de la columna seleccionada
+        //TODO colocar indices existentes de la columna seleccionada
         VBox indexVBox = new VBox();
         indexVBox.setAlignment(Pos.CENTER);
         indexVBox.setSpacing(5);
@@ -113,57 +163,22 @@ public class querySchemeCollection extends Application {
         searchButton.setFitWidth(40);
         searchButton.setFitHeight(40);
         searchButton.setOnMouseClicked(event -> {
+
             String attrEntryText = attrEntry.getText();
-            String attrComboBox = schemeAttr.getValue();
-            String indexComboBox = actualIndex.getValue();
+            String attrComboBox = schemeAttr.getSelectionModel().getSelectedItem();
+            String indexComboBox = actualIndex.getSelectionModel().getSelectedItem();
             String joinCombobox = "";
 
+            generateJson(attrEntryText, attrComboBox, indexComboBox, joinCombobox, joinAttrComboBox);
 
-            if (attrComboBox != null){
-                if (!join){
-                    //TODO asignar valor a joinCombobox
-                    joinCombobox = "";
-                }
-                if (!attrEntryText.isBlank()){
-                    if (indexComboBox != null){
+            System.out.println("JSON Generated " + generatedJson);
 
-                        System.out.println("Enviando datos al servidor");
-                        generatedJson.put("action", "queryData");
-                        JSONObject parameters = new JSONObject();
-                        parameters.put("scheme", controller.getActualSchemeName());
-                        if (!joinCombobox.isBlank()){ //TODO cambiar condicion por joinCombobox!=null
-                            parameters.put("searchByJoin", true);
-//                            parameters.put("searchBy", attrComboBox);
-                            //TODO colocar como searchBy el atributo correspondiente al join
-                        } else {
-                            parameters.put("searchBy", attrComboBox);
-                            parameters.put("searchByJoin", false);
-                        }
-                        parameters.put("dataToSearch", attrEntryText);
-                        if (indexComboBox.equals("NO")) {
-                            parameters.put("index", false);
-                        }
-                        else {
-                            parameters.put("index", true);
-                            parameters.put("tree", indexComboBox);
-                        }
-
-                        generatedJson.put("parameters", parameters.toString());
-                        controller.sendQuery(generatedJson);
+            controller.sendQuery(generatedJson);
 
 
-                    } else {
-                        showAlert("Debe seleccionar algun indice para realizar una busqueda, o NO en caso de" +
-                                "que no desee usar indices", Alert.AlertType.ERROR);
-                    }
-                } else {
-                    showAlert("Debe ingresar un dato para buscarlo", Alert.AlertType.ERROR);
-                }
-            } else {
-                showAlert("Debe seleccionar una columna", Alert.AlertType.ERROR);
-            }
 
-            System.out.println("Buscando registros para " + attrEntryText);
+            stage.close();
+
         });
 
 
@@ -174,7 +189,8 @@ public class querySchemeCollection extends Application {
         lookinFor.setFitWidth(170);
         lookinFor.setFitHeight(204);
 
-        attrBox.getChildren().addAll(attrVBox, toSearchVBox);
+
+
         index.getChildren().addAll(indexVBox);
         button.setRight(searchButton);
         button.setLeft(lookinFor);
@@ -189,6 +205,55 @@ public class querySchemeCollection extends Application {
         stage.setScene(scene);
         stage.setTitle("Consultar información");
         stage.show();
+
+
+    }
+
+    private void generateJson(String attrEntryText, String attrComboBox, String indexComboBox, String joinCombobox,
+                              ComboBox<String> joinAttrComboBox) {
+        if (attrComboBox != null){
+            if (join){
+
+                joinCombobox = joinAttrComboBox.getValue();
+            }
+            if (!attrEntryText.isBlank()){
+                if (indexComboBox != null){
+
+                    System.out.println("Enviando datos al servidor");
+                    generatedJson.put("action", "queryData");
+                    JSONObject parameters = new JSONObject();
+                    parameters.put("scheme", controller.getActualSchemeName());
+                    if (!joinCombobox.isBlank()){
+                        parameters.put("searchByJoin", true);
+                        parameters.put("searchBy", joinCombobox);
+                    } else {
+                        parameters.put("searchBy", attrComboBox);
+                        parameters.put("searchByJoin", false);
+                    }
+                    parameters.put("dataToSearch", attrEntryText);
+                    if (indexComboBox.equals("NO")) {
+                        parameters.put("index", false);
+                    }
+                    else {
+                        parameters.put("index", true);
+                        parameters.put("tree", indexComboBox);
+                    }
+
+                    generatedJson.put("parameters", parameters.toString());
+                    controller.sendQuery(generatedJson);
+
+
+
+                } else {
+                    showAlert("Debe seleccionar algun indice para realizar una busqueda, o NO en caso de" +
+                            "que no desee usar indices", Alert.AlertType.ERROR);
+                }
+            } else {
+                showAlert("Debe ingresar un dato para buscarlo", Alert.AlertType.ERROR);
+            }
+        } else {
+            showAlert("Debe seleccionar una columna", Alert.AlertType.ERROR);
+        }
 
 
     }
