@@ -31,6 +31,7 @@ public class querySchemeCollection extends Application {
     private static Controller controller;
     private boolean join;
     private JSONObject generatedJson;
+    private String joinName = null;
     private final int SCREEN_WIDTH = 600;
     private final int SCREEN_HEIGHT = 400;
 
@@ -105,32 +106,25 @@ public class querySchemeCollection extends Application {
 
         schemeAttr.setOnAction(actionEvent -> {
             join = false;
-
             int size = attrBox.getChildren().size();
-
-
             if (size>1) {
                 attrBox.getChildren().remove(toSearchVBox);
                 attrBox.getChildren().remove(joinVBox);
                 joinVBox.getChildren().clear();
             }
-
-
             int indexAttr = schemeAttr.getSelectionModel().getSelectedIndex();
             String atType = attrType.getString(indexAttr);
             String atJoin = null;
             if (atType.equals("join")){
                 atJoin = attrSize.getString(indexAttr);
+                joinName = atJoin;
                 System.out.println("La columna seleccionada es de tipo join");
                 join = true;
             }
-
             if (join) {
                 if (atJoin!=null){
                     JSONObject schemeSelected = new JSONObject(localSchemes.get(atJoin));
-                    System.out.println(schemeSelected);
                     JSONArray attrNameJoin = schemeSelected.getJSONArray("attrName");
-
                     for (int j = 0; j < attrNameJoin.length(); j++) {
                         joinAttrComboBox.getItems().add(attrNameJoin.getString(j));
                     }
@@ -139,8 +133,6 @@ public class querySchemeCollection extends Application {
                 }
             }
             attrBox.getChildren().add(toSearchVBox);
-
-
         });
 
 
@@ -169,15 +161,13 @@ public class querySchemeCollection extends Application {
             String indexComboBox = actualIndex.getSelectionModel().getSelectedItem();
             String joinCombobox = "";
 
-            generateJson(attrEntryText, attrComboBox, indexComboBox, joinCombobox, joinAttrComboBox);
+            boolean generated  = generateJson(attrEntryText, attrComboBox, indexComboBox, joinCombobox, joinAttrComboBox);
 
-            System.out.println("JSON Generated " + generatedJson);
-
-            controller.sendQuery(generatedJson);
-
-
-
-            stage.close();
+            if (generated) {
+                System.out.println("JSON Generated " + generatedJson);
+                controller.sendQuery(generatedJson);
+                stage.close();
+            }
 
         });
 
@@ -209,7 +199,7 @@ public class querySchemeCollection extends Application {
 
     }
 
-    private void generateJson(String attrEntryText, String attrComboBox, String indexComboBox, String joinCombobox,
+    private boolean generateJson(String attrEntryText, String attrComboBox, String indexComboBox, String joinCombobox,
                               ComboBox<String> joinAttrComboBox) {
         if (attrComboBox != null){
             if (join){
@@ -226,6 +216,7 @@ public class querySchemeCollection extends Application {
                     if (!joinCombobox.isBlank()){
                         parameters.put("searchByJoin", true);
                         parameters.put("searchBy", joinCombobox);
+                        parameters.put("joinName", joinName);
                     } else {
                         parameters.put("searchBy", attrComboBox);
                         parameters.put("searchByJoin", false);
@@ -240,7 +231,8 @@ public class querySchemeCollection extends Application {
                     }
 
                     generatedJson.put("parameters", parameters.toString());
-                    controller.sendQuery(generatedJson);
+
+                    return true;
 
 
 
@@ -255,6 +247,7 @@ public class querySchemeCollection extends Application {
             showAlert("Debe seleccionar una columna", Alert.AlertType.ERROR);
         }
 
+        return false;
 
     }
 
