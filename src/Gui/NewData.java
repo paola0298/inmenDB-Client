@@ -28,6 +28,7 @@ public class NewData extends Application {
     private final int SCREEN_WIDTH = 600;
     private final int SCREEN_HEIGHT = 400;
     private boolean join;
+    private int posOfPk;
 
     @Override
     public void start(Stage stage) {
@@ -52,15 +53,29 @@ public class NewData extends Application {
 
         JSONObject actualScheme = controller.getSelectedScheme(); //estructura
 
+
+
+
+
         JSONArray attrNames =  controller.getSelectedSchemeAttr();
         JSONArray attrType = actualScheme.getJSONArray("attrType");
         JSONArray attrSize = actualScheme.getJSONArray("attrSize");
 
         String actualSchemeName = controller.getActualSchemeName();
         Hashtable<String, String> localSchemes = controller.getLocalSchemes();
-        Hashtable<String, Hashtable<String, String>> localCollections =  controller.getLocalCollections(); //TODO LinkedHashMap
+        Hashtable<String, Hashtable<String, String>> localCollections =  controller.getLocalCollections();
 
-        Hashtable<String, String> actualCollectionScheme = localCollections.get(controller.getActualSchemeName());
+        Hashtable<String, String> actualCollectionScheme = localCollections.get(actualSchemeName);
+
+        //////
+        String actualPkAttr = actualScheme.getString("primaryKey");
+        posOfPk = -1;
+        for(int i=0; i<attrNames.length(); i++){
+            if (attrNames.get(i).equals(actualPkAttr)){
+                posOfPk = i;
+            }
+        }
+        //////
 
         //agregar datos a combobox
 
@@ -71,34 +86,22 @@ public class NewData extends Application {
             labels.getChildren().add(attribute);
 
             if (attrType.get(i).equals("join")){
-                join = true;
-                ComboBox<String> schemes = new ComboBox<>();
-                ComboBox<String> collections = new ComboBox<>();
-                text.getChildren().add(schemes);
 
-                if (localCollections.size()>0) {
-                    for (String name : localCollections.keySet()) {
-                        if (!name.equals(actualSchemeName)) {
-                            schemes.getItems().add(name);
-                        }
+                String joinScheme = attrSize.getString(i);
+                Hashtable<String, String> joinCollection = localCollections.get(joinScheme);
+
+                join = true;
+                ComboBox<String> collections = new ComboBox<>();
+
+                if (joinCollection!=null && joinCollection.size()>0 ) {
+                    for (String id : joinCollection.keySet()) {
+                        collections.getItems().add(id);
+
                     }
 
-                    schemes.setOnAction(actionEvent -> {
-                        String schemeSelected = schemes.getValue();
-                        System.out.println("Scheme selected " + schemeSelected);
-                        System.out.println("local collections " + localCollections);
-                        Hashtable<String, String> actualCollection = localCollections.get(schemeSelected);
-
-                        for (String id : actualCollection.keySet()) {
-                            collections.getItems().add(id);
-                        }
-
-                        text.getChildren().add(collections);
-                    });
-
+                    text.getChildren().add(collections);
                 } else {
-                    showAlert("Es necesario que hayan colecciones de datos de los joins con que se encuentra " +
-                            "unido el esquema", Alert.AlertType.ERROR);
+                    showAlert("No hay registros en el esquema con el que se hace join", Alert.AlertType.ERROR);
                     return;
                 }
 
@@ -118,30 +121,27 @@ public class NewData extends Application {
             System.out.println("Saving records...");
             System.out.println(generatedJson);
 
-            //TODO verificar que no hayan pk repetidas
             JSONArray attr = new JSONArray();
             String attribute = "";
 
-            String pk = ""; //TODO get pk of actual register to be saved
+            String pk = "";
 
             for (int i=0; i<text.getChildren().size(); i++) {
                 if (!join) {
                     TextField data = (TextField) text.getChildren().get(i);
                     attribute = data.getText();
+
                 } else {
                     try {
                         TextField data = (TextField) text.getChildren().get(i);
                         attribute = data.getText();
                     } catch (Exception e) {
-                        ComboBox<String> scheme = (ComboBox<String>) text.getChildren().get(i);
-                        i++;
                         ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
                         attribute = collectionId.getValue();
                     }
                 }
 
                 if (attribute.equals(pk)){
-                    //TODO verificar con las demas pk de las otras colecciones de ese esquema
                     for (String key : actualCollectionScheme.keySet()){
                         if (key.equals(attribute)){
                             showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
@@ -156,7 +156,7 @@ public class NewData extends Application {
 
 //                try {
 //
-//                    //TODO verificar tamaño del dato
+//                    //TODO verificar tamaño del dato y tipo de dato
 //
 //
 //                    String attriType = attrType.getString(i);
@@ -185,13 +185,20 @@ public class NewData extends Application {
 
             System.out.println("Attributes " + attr);
 
-            generatedJson.put("action", "insertData");
-            generatedJson.put("schemeName", actualSchemeName);
-            generatedJson.put("attr", attr);
+            boolean foundPkInCollection = foundPk(attr, actualCollectionScheme);
+
+            if (!foundPkInCollection) {
+
+                generatedJson.put("action", "insertData");
+                generatedJson.put("schemeName", actualSchemeName);
+                generatedJson.put("attr", attr);
 
 
-            controller.insertData(generatedJson);
-            stage.close();
+                controller.insertData(generatedJson);
+                stage.close();
+            } else {
+                showAlert("El valor en " + actualPkAttr + " ya existe", Alert.AlertType.ERROR);
+            }
 
         });
 
@@ -205,6 +212,22 @@ public class NewData extends Application {
         stage.setTitle("Agregar nuevos registros");
         stage.show();
 
+    }
+
+    private boolean foundPk(JSONArray attr, Hashtable<String, String> actualCollectionScheme) {
+        if (posOfPk!=-1){
+            String actualPk = attr.getString(posOfPk);
+
+            if (actualCollectionScheme != null) {
+
+                for (String key : actualCollectionScheme.keySet()) {
+                    if (key.equals(actualPk)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private Image loadImg(String relativePath) {
