@@ -142,7 +142,6 @@ public class GUI extends Application{
         addRegisterButton.setFitWidth(28);
         addRegisterButton.setFitHeight(28);
         addRegisterButton.setOnMouseClicked(mouseEvent -> {
-            //TODO añadir funcionalidad para agregar registros
             System.out.println("Add register in " + actualSchemeName.getText());
             controller.insertData();
 
@@ -151,7 +150,6 @@ public class GUI extends Application{
         searchButton.setFitWidth(28);
         searchButton.setFitHeight(28);
         searchButton.setOnMouseClicked(mouseEvent -> {
-            //TODO añadir funcionalidad para buscar en la colección de un esquema
             System.out.println("Search in scheme " + actualSchemeName.getText());
             controller.querySchemeCollection();
         });
@@ -240,7 +238,6 @@ public class GUI extends Application{
     }
 
     private void deleteScheme(String schemeName) {
-        //TODO mandar solicitud al servidor para eliminar esquema
         System.out.println("Eliminar esquema " + schemeName);
         controller.deleteScheme(schemeName);
     }
