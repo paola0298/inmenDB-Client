@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -150,37 +151,23 @@ public class NewData extends Application {
                     }
                 }
 
+                //TODO verificar tamaño del dato y tipo de dato
+
+
+                boolean numeric = StringUtils.isNumeric(attribute);
+                String attriType = attrType.getString(i);
+
+                if (attriType.equals("string") && numeric) {
+
+
+                }
+
+
+
                 attr.put(attribute);
 
 
 
-//                try {
-//
-//                    //TODO verificar tamaño del dato y tipo de dato
-//
-//
-//                    String attriType = attrType.getString(i);
-//
-//                    switch (attriType) {
-//                        case "int":
-//                            System.out.println("Checking int");
-//                            break;
-//                        case "float":
-//                            System.out.println("Checking float");
-//                            break;
-//                        case "long":
-//                            System.out.println("Checking long");
-//                            break;
-//                        case "double":
-//                            System.out.println("Checking double");
-//                            break;
-//                        case "string":
-//                            System.out.println("Checking string");
-//                            break;
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println(e.getMessage());
-//                }
             }
 
             System.out.println("Attributes " + attr);
