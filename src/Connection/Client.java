@@ -69,7 +69,7 @@ public class Client {
         try {
             DataInputStream is = new DataInputStream(this.clientSocket.getInputStream());
             String data = is.readUTF();
-            System.out.println("Data from server: \n" + data);
+//            System.out.println("Data from server: \n" + data);
             return new JSONObject(data);
         } catch (IOException e) {
             System.out.println("Error getting data: " + e.getMessage());

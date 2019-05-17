@@ -1,7 +1,6 @@
 package Logic;
 
 import Connection.Client;
-
 import Gui.GUI;
 import Gui.NewData;
 import Gui.NewScheme;
@@ -14,9 +13,7 @@ import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.Properties;
 
 /**
@@ -32,8 +29,11 @@ public class Controller {
     private Client client;
 
     private Hashtable<String, String> localSchemes;
-    private Hashtable<String, Hashtable<String, String>> localCollections;
+    private Hashtable<String, Hashtable<String, JSONArray>> localCollections;
     private ObjectMapper mapper;
+
+    private TypeReference<Hashtable<String, String>> schemeTypeRef = new TypeReference<>() {};
+    private TypeReference<Hashtable<String, Hashtable<String, JSONArray>>> collectionsTypeRef = new TypeReference<>() {};
 
     /**
      * Constructor por defecto de Controller.
@@ -78,8 +78,7 @@ public class Controller {
 
         if (response.getString("status").equals("success")) {
             try {
-                @SuppressWarnings("unchecked")
-                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
+                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), schemeTypeRef);
                 mainGui.loadSchemesList(updatedSchemes);
                 mainGui.showMessage("Esquema añadido correctamente - " + getFinalTime(startTime));
                 localSchemes = updatedSchemes;
@@ -107,15 +106,12 @@ public class Controller {
 
         if (response.getString("status").equals("success")) {
             try {
-                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
+                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), schemeTypeRef);
                 mainGui.loadSchemesList(updatedSchemes);
                 mainGui.showMessage("Esquema eliminado correctamente - " + getFinalTime(startTime));
                 localSchemes = updatedSchemes;
 
-
-                TypeReference<Hashtable<String, Hashtable<String, String>>> typeRef = new TypeReference<>() {} ;
-                Hashtable<String, Hashtable<String, String>> updateCollections = mapper.readValue(response.getString("collections"), typeRef);
-                localCollections = updateCollections;
+                localCollections = mapper.readValue(response.getString("collections"), collectionsTypeRef);
 
             } catch (IOException e) {
                 mainGui.showMessage(e.getMessage() + " - " + getFinalTime(startTime));
@@ -129,31 +125,65 @@ public class Controller {
         }
     }
 
-    private String getFinalTime(double startTime) {
-        return (System.currentTimeMillis() - startTime) / 1000 + " s";
-    }
+    public void deleteRecords(JSONArray records) {
 
-    public void querySchemes() {
         double startTime = System.currentTimeMillis();
 
         JSONObject action = new JSONObject();
-        action.put("action", "querySchemes");
+        action.put("action", "deleteData");
+        action.put("scheme", getActualSchemeName());
+        action.put("records", records);
 
         JSONObject response = client.connect(action);
 
         if (response.getString("status").equals("success")) {
             try {
-                @SuppressWarnings("unchecked")
-                Hashtable<String, String> updatedSchemes = mapper.readValue(response.getString("schemes"), Hashtable.class);
-                mainGui.loadSchemesList(updatedSchemes);
-                mainGui.showMessage("Esquemas cargados correctamente - " + getFinalTime(startTime));
-                localSchemes = updatedSchemes;
+                Hashtable<String, Hashtable<String, JSONArray>> updatedCollections = mapper.readValue(
+                        response.getString("collections"), collectionsTypeRef);
+
+                mainGui.loadSchemeTableColumns(getSelectedScheme(), updatedCollections.get(getActualSchemeName()));
+
+                mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
+
+                localCollections = updatedCollections;
 
             } catch (IOException e) {
-                mainGui.showMessage("Error al recibir los esquemas - " + getFinalTime(startTime));
+                mainGui.showMessage("Error al recibir los datos del servidor - " + getFinalTime(startTime));
             }
         } else {
-            mainGui.showMessage("No se pudieron recuperar los esquemas - " + getFinalTime(startTime));
+            mainGui.showMessage("Ocurrió un error al eliminar los registros - " + getFinalTime(startTime));
+        }
+    }
+
+    private String getFinalTime(double startTime) {
+        return (System.currentTimeMillis() - startTime) / 1000 + " s";
+    }
+
+    public void getUpdatedData() {
+        double startTime = System.currentTimeMillis();
+
+        JSONObject action = new JSONObject();
+        action.put("action", "getUpdatedData");
+
+        JSONObject response = client.connect(action);
+
+        if (response.getString("status").equals("success")) {
+            try {
+                Hashtable<String, String> updatedSchemes = mapper.readValue(
+                        response.getString("schemes"), schemeTypeRef);
+                Hashtable<String, Hashtable<String, JSONArray>> updatedCollections = mapper.readValue(
+                        response.getString("collections"), collectionsTypeRef);
+
+                mainGui.loadSchemesList(updatedSchemes);
+                mainGui.showMessage("Esquemas y colecciones cargados correctamente - " + getFinalTime(startTime));
+                localSchemes = updatedSchemes;
+                localCollections = updatedCollections;
+
+            } catch (IOException e) {
+                mainGui.showMessage("Error al recibir los datos del servidor - " + getFinalTime(startTime));
+            }
+        } else {
+            mainGui.showMessage("No se pudieron recuperar los datos del servidor - " + getFinalTime(startTime));
         }
     }
 
@@ -169,17 +199,22 @@ public class Controller {
 
         if (response.getString("status").equals("success")) {
             try {
-                Hashtable<String, String> registers = mapper.readValue(response.getString("collection"), Hashtable.class);
-                mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")));
-                mainGui.loadDataToTable(registers);
+                TypeReference<Hashtable<String, JSONArray>> typeReference = new TypeReference<>() {};
+//                Hashtable<String, String> collection = mapper.readValue(response.getString("collection"), schemeTypeRef);
+                Hashtable<String, JSONArray> collection = mapper.readValue(response.getString("collection"), typeReference);
 
+                System.out.println("Colección a cargar: " + collection);
+                mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")), collection);
+//                if (collection != null) {
+//                    mainGui.loadDataToTable(collection);
+//                }
                 mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(time));
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-
+            mainGui.showMessage("No se pudieron recuperar los datos del servidor - " + getFinalTime(time));
         }
 
     }
@@ -207,7 +242,6 @@ public class Controller {
 
     }
 
-
     public void querySchemeCollection() {
         querySchemeCollection.queryScheme();
     }
@@ -224,10 +258,11 @@ public class Controller {
 
         if (response.get("status").equals("success")){
             try {
-                TypeReference<Hashtable<String, Hashtable<String, String>>> typeRef = new TypeReference<>() {} ;
-                Hashtable<String, Hashtable<String, String>> updateCollections = mapper.readValue(response.getString("collections"), typeRef);
-                localCollections = updateCollections;
-                //TODO agregar a tableview
+                localCollections = mapper.readValue(response.getString("collections"), collectionsTypeRef);
+
+                String actualScheme = getActualSchemeName();
+                mainGui.loadSchemeTableColumns(
+                        new JSONObject(localSchemes.get(actualScheme)), localCollections.get(actualScheme));
                 mainGui.showMessage("Registro agregado correctamente - " + getFinalTime(startTime));
 
 
@@ -266,7 +301,7 @@ public class Controller {
 
     }
 
-    public Hashtable<String, Hashtable<String, String>> getLocalCollections() {
+    public Hashtable<String, Hashtable<String, JSONArray>> getLocalCollections() {
         System.out.println("local collections in controller " + localCollections);
         return localCollections;
     }

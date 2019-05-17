@@ -3,6 +3,11 @@ package Gui;
 import Logic.Controller;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -14,7 +19,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,9 +33,11 @@ public class GUI extends Application{
     private BorderPane mainLayout;
     private VBox schemesList;
     private VBox indexList;
-    private TableView schemeDataTable;
+    private TableView<JSONArray> schemeDataTable;
     private Label actualSchemeName;
     private VBox schemeDataContainer;
+
+    private Thread messageThread;
 
     public void start(Stage stage) {
         this.controller = Controller.getInstance();
@@ -138,6 +147,13 @@ public class GUI extends Application{
         headerActions.setAlignment(Pos.CENTER_RIGHT);
         headerActions.setSpacing(10);
         HBox.setHgrow(headerActions, Priority.ALWAYS);
+        ImageView deleteRecords = new ImageView(loadImg("res/images/delete2.png"));
+        deleteRecords.setFitWidth(26);
+        deleteRecords.setFitHeight(26);
+        deleteRecords.setOnMouseClicked(mouseEvent -> {
+            System.out.println("Delete selected records of " + actualSchemeName.getText());
+            deleteSelectedRecords();
+        });
         ImageView addRegisterButton = new ImageView(loadImg("res/images/plus.png"));
         addRegisterButton.setFitWidth(28);
         addRegisterButton.setFitHeight(28);
@@ -153,10 +169,12 @@ public class GUI extends Application{
             System.out.println("Search in scheme " + actualSchemeName.getText());
             controller.querySchemeCollection();
         });
-        headerActions.getChildren().addAll(addRegisterButton, searchButton);
+        headerActions.getChildren().addAll(deleteRecords, addRegisterButton, searchButton);
         schemeDataHeader.getChildren().addAll(actualSchemeName, headerActions);
         //Tabla de datos del esquema
-        schemeDataTable = new TableView();
+        schemeDataTable = new TableView<>();
+        schemeDataTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        schemeDataTable.setPlaceholder(new Label("No hay datos en la tabla"));
         VBox.setVgrow(schemeDataTable, Priority.ALWAYS);
         HBox.setHgrow(schemeDataTable, Priority.ALWAYS);
         schemeDataContainer.getChildren().addAll(schemeDataHeader, schemeDataTable);
@@ -183,7 +201,34 @@ public class GUI extends Application{
         stage.setScene(scene);
         stage.show();
 
-        controller.querySchemes();
+        controller.getUpdatedData();
+    }
+
+    private void deleteSelectedRecords() {
+        ObservableList<JSONArray> recordsToDelete = schemeDataTable.getSelectionModel().getSelectedItems();
+        if (recordsToDelete.size() > 0) {
+
+            JSONArray primaryKeys = new JSONArray();
+
+            JSONObject scheme = this.controller.getSelectedScheme();
+            JSONArray attrName = scheme.getJSONArray("attrName");
+
+            String pk = scheme.getString("primaryKey");
+            int pkIndex = 0;
+
+            for (int i=0; i<attrName.length(); i++) {
+                if (attrName.getString(i).equals(pk)) {
+                    pkIndex = i;
+                }
+            }
+
+            for (JSONArray registry: recordsToDelete) {
+                primaryKeys.put(registry.getString(pkIndex));
+            }
+
+            this.controller.deleteRecords(primaryKeys);
+
+        }
     }
 
     /**
@@ -248,28 +293,28 @@ public class GUI extends Application{
         actualSchemeName.setText(schemeName);
     }
 
-    public void loadSchemeTableColumns(JSONObject scheme) {
+    public void loadSchemeTableColumns(JSONObject scheme, Hashtable<String, JSONArray> collection) {
 
         System.out.println("Cargando columnas");
 
         schemeDataTable.getColumns().clear();
 
+        // [cedula, nombre, edad]
         JSONArray attributes = scheme.getJSONArray("attrName");
 
+        // [[402390083, Paola, 20], [122200589521, Marlon, 20]]
+        ObservableList<JSONArray> items = FXCollections.observableArrayList(collection.values());
+
         for (int i=0; i<attributes.length(); i++) {
-            TableColumn column = new TableColumn(attributes.getString(i));
-            column.setMinWidth(50);
+            TableColumn<JSONArray, String> column = new TableColumn(attributes.getString(i));
+            int finalI = i;
+            column.setCellValueFactory(p -> {
+                return new SimpleStringProperty(p.getValue().getString(finalI));
+            });
+            column.setPrefWidth(150);
             schemeDataTable.getColumns().add(column);
-
         }
-
-    }
-
-    public void loadDataToTable(Hashtable<String, String> collection) {
-        //TODO meter los datos a las columnas de la tabla
-        System.out.println("Añadiendo datos");
-        System.out.println(collection);
-
+        schemeDataTable.setItems(items);
     }
 
     public String getSelectedSchemeName() {
@@ -286,18 +331,23 @@ public class GUI extends Application{
         return new Image("file://" + cwd + "/" + relativePath);
     }
 
-    public void showMessage(String message) {
+    private void startMessageThread() {
         HBox messageContainer = new HBox();
         messageContainer.setPrefHeight(0);
-        messageContainer.setStyle("-fx-background-color: #dbdbdb;");
+        messageContainer.setStyle("-fx-background-color: #3C3C3C;");
         messageContainer.setAlignment(Pos.CENTER_LEFT);
 
-        Label messageLabel = new Label(message);
+        Label messageLabel = new Label();
+        messageLabel.setTextFill(Color.WHITE);
+//        messageLabel.setStyle("-fx-font-weight: bold;");
         messageLabel.setPadding(new Insets(0, 10, 0, 10));
 
         mainLayout.setBottom(messageContainer);
 
-        Thread messageThread = new Thread(() -> {
+        messageThread = new Thread(() -> {
+            while (!messageThread.isInterrupted()) {
+
+            }
             try {
                 //Expandir el mensaje
                 double size = 0;
@@ -314,7 +364,7 @@ public class GUI extends Application{
                 Platform.runLater(() -> messageContainer.getChildren().clear());
 
                 //Contraer el mensaje
-                for (double i=25; i>0; i--) {
+                for (double i = 25; i > 0; i--) {
                     Thread.sleep(25);
                     size -= 1;
                     double finalSize = size;
@@ -329,101 +379,147 @@ public class GUI extends Application{
         messageThread.start();
     }
 
-    public void addIndexTitle(VBox index, String name) {
-        HBox indextitle = new HBox();
-        indextitle.setSpacing(30);
-        Label title = new Label(name);
-        ContextMenu indexMenu = new ContextMenu();
-        Button edit = new Button("Editar");
-        edit.setContextMenu(indexMenu);
-        MenuItem editIndex = new MenuItem("Editar Índice...");
-        editIndex.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                System.out.println("Editar índice");
+    public void showMessage(String message) {
+
+        HBox messageContainer = new HBox();
+        messageContainer.setPrefHeight(0);
+        messageContainer.setStyle("-fx-background-color: #3C3C3C;");
+        messageContainer.setAlignment(Pos.CENTER_LEFT);
+
+        Label messageLabel = new Label(message);
+        messageLabel.setTextFill(Color.WHITE);
+//        messageLabel.setStyle("-fx-font-weight: bold;");
+        messageLabel.setPadding(new Insets(0, 10, 0, 10));
+
+        mainLayout.setBottom(messageContainer);
+
+        messageThread = new Thread(() -> {
+            try {
+                //Expandir el mensaje
+                double size = 0;
+                for (double i = 0; i < 25; i++) {
+                    Thread.sleep(25);
+                    size += 1;
+                    double finalSize = size;
+                    Platform.runLater(() -> messageContainer.setPrefHeight(finalSize));
+
+                }
+
+                Platform.runLater(() -> messageContainer.getChildren().add(messageLabel));
+                Thread.sleep(5000);
+                Platform.runLater(() -> messageContainer.getChildren().clear());
+
+                //Contraer el mensaje
+                for (double i = 25; i > 0; i--) {
+                    Thread.sleep(25);
+                    size -= 1;
+                    double finalSize = size;
+                    Platform.runLater(() -> messageContainer.setPrefHeight(finalSize));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            Platform.runLater(() -> mainLayout.setBottom(null));
         });
-        MenuItem deleteIndex = new MenuItem("Eliminar Índice");
-        deleteIndex.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                System.out.println("Se elimina el índice");
-            }
-        });
-
-
-        indexMenu.getItems().addAll(editIndex, deleteIndex);
-        indextitle.getChildren().addAll(title, edit);
-        index.getChildren().addAll(indextitle);
-
+        messageThread.setDaemon(true);
+        messageThread.start();
     }
 
-    /**
-     * En este método es donde se va a crear la Tabla, se llama al método de las configuraciones y se llama al método que inserta los datos
-     *
-     * @return
-     */
-    private TableView createTable() {
-        //Se crea la tabla para visualizar los datos
-        TableView data = new TableView();
-        setTableappearance(data);
-        addData(data);
-        return data;
-
-    }
-
-    private GridPane setGridData() {
-        GridPane data = new GridPane();
-        data.setHgap(6);
-        data.setVgap(8);
-        data.setPadding(new Insets(10, 10, 10, 10));
-        data.setGridLinesVisible(true);
-        return data;
-
-    }
-
-    private GridPane addToGridData(GridPane data) {//, JSONObject json){
-//        int column = json.getJSONArray("attr").length();
-//        Se añaden los títulos de las columnas
-//        for (int i = 0; i <= column -1; i++){
-//            TextField title = new TextField(json.getJSONArray("atrr").getString(i));
-//            data.addColumn(i, title);
-//        }
-//        TextField buttontitle = new TextField("");
-//        data.addColumn(column, buttontitle);
-//        Button b = new Button("ve");
-//        data.add(b,1,0);
-        return data;
-    }
-
-    /**
-     * Este método se encarga de las configuraciones de la tabla para visualizar los datos
-     *
-     * @param data data
-     */
-    private void setTableappearance(TableView data) {
-        data.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        data.setPrefWidth(600);
-        data.setPrefHeight(600);
-
-    }
-
-    /**
-     * Este método se va a encargar de llenar con los datos necesarios la tabla
-     *
-     * @param data data
-     * @return
-     */
-    public TableView addData(TableView data) {
-        TableColumn<Button, String> column1 = new TableColumn("Boton");
-//        TableColumn<Scheme, String> column2 = new TableColumn("Nombre");
+//    public void addIndexTitle(VBox index, String name) {
+//        HBox indextitle = new HBox();
+//        indextitle.setSpacing(30);
+//        Label title = new Label(name);
+//        ContextMenu indexMenu = new ContextMenu();
+//        Button edit = new Button("Editar");
+//        edit.setContextMenu(indexMenu);
+//        MenuItem editIndex = new MenuItem("Editar Índice...");
+//        editIndex.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent actionEvent) {
+//                System.out.println("Editar índice");
+//            }
+//        });
+//        MenuItem deleteIndex = new MenuItem("Eliminar Índice");
+//        deleteIndex.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent actionEvent) {
+//                System.out.println("Se elimina el índice");
+//            }
+//        });
 //
-//        column2.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 //
-//        data.getColumns().addAll(column1, column2);
-//        data.getItems().add(new Scheme());
-        return data;
-    }
+//        indexMenu.getItems().addAll(editIndex, deleteIndex);
+//        indextitle.getChildren().addAll(title, edit);
+//        index.getChildren().addAll(indextitle);
+//
+//    }
+
+//    /**
+//     * En este método es donde se va a crear la Tabla, se llama al método de las configuraciones y se llama al método que inserta los datos
+//     *
+//     * @return
+//     */
+//    private TableView createTable() {
+//        //Se crea la tabla para visualizar los datos
+//        TableView data = new TableView();
+//        setTableappearance(data);
+//        addData(data);
+//        return data;
+//
+//    }
+//
+//    private GridPane setGridData() {
+//        GridPane data = new GridPane();
+//        data.setHgap(6);
+//        data.setVgap(8);
+//        data.setPadding(new Insets(10, 10, 10, 10));
+//        data.setGridLinesVisible(true);
+//        return data;
+//
+//    }
+//
+//    private GridPane addToGridData(GridPane data) {//, JSONObject json){
+////        int column = json.getJSONArray("attr").length();
+////        Se añaden los títulos de las columnas
+////        for (int i = 0; i <= column -1; i++){
+////            TextField title = new TextField(json.getJSONArray("atrr").getString(i));
+////            data.addColumn(i, title);
+////        }
+////        TextField buttontitle = new TextField("");
+////        data.addColumn(column, buttontitle);
+////        Button b = new Button("ve");
+////        data.add(b,1,0);
+//        return data;
+//    }
+
+//    /**
+//     * Este método se encarga de las configuraciones de la tabla para visualizar los datos
+//     *
+//     * @param data data
+//     */
+//    private void setTableappearance(TableView data) {
+//        data.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+//        data.setPrefWidth(600);
+//        data.setPrefHeight(600);
+//
+//    }
+
+//    /**
+//     * Este método se va a encargar de llenar con los datos necesarios la tabla
+//     *
+//     * @param data data
+//     * @return
+//     */
+//    public TableView addData(TableView data) {
+//        TableColumn<Button, String> column1 = new TableColumn("Boton");
+////        TableColumn<Scheme, String> column2 = new TableColumn("Nombre");
+////
+////        column2.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+////
+////        data.getColumns().addAll(column1, column2);
+////        data.getItems().add(new Scheme());
+//        return data;
+//    }
 
     public void show() {
         launch(GUI.class);

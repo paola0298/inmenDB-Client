@@ -64,9 +64,9 @@ public class NewData extends Application {
 
         String actualSchemeName = controller.getActualSchemeName();
         Hashtable<String, String> localSchemes = controller.getLocalSchemes();
-        Hashtable<String, Hashtable<String, String>> localCollections =  controller.getLocalCollections();
+        Hashtable<String, Hashtable<String, JSONArray>> localCollections =  controller.getLocalCollections();
 
-        Hashtable<String, String> actualCollectionScheme = localCollections.get(actualSchemeName);
+        Hashtable<String, JSONArray> actualCollectionScheme = localCollections.get(actualSchemeName);
 
         //////
         String actualPkAttr = actualScheme.getString("primaryKey");
@@ -89,7 +89,7 @@ public class NewData extends Application {
             if (attrType.get(i).equals("join")){
 
                 String joinScheme = attrSize.getString(i);
-                Hashtable<String, String> joinCollection = localCollections.get(joinScheme);
+                Hashtable<String, JSONArray> joinCollection = localCollections.get(joinScheme);
 
                 join = true;
                 ComboBox<String> collections = new ComboBox<>();
@@ -201,7 +201,7 @@ public class NewData extends Application {
 
     }
 
-    private boolean foundPk(JSONArray attr, Hashtable<String, String> actualCollectionScheme) {
+    private boolean foundPk(JSONArray attr, Hashtable<String, JSONArray> actualCollectionScheme) {
         if (posOfPk!=-1){
             String actualPk = attr.getString(posOfPk);
 

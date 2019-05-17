@@ -441,10 +441,10 @@ public class NewScheme extends Application {
     }
 
 //    public JSONObject updateScheme(JSONObject actualScheme) {
-    public JSONObject updateScheme() {
-        modifyScheme = true;
-//        editableJson = actualScheme;
-        launch(NewScheme.class);
-        return generatedJson;
-    }
+//    public JSONObject updateScheme() {
+//        modifyScheme = true;
+////        editableJson = actualScheme;
+//        launch(NewScheme.class);
+//        return generatedJson;
+//    }
 }
