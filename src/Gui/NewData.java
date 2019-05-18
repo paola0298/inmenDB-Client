@@ -30,21 +30,24 @@ public class NewData extends Application {
     private final int SCREEN_HEIGHT = 400;
     private boolean join;
     private int posOfPk;
+    private boolean correctDataType;
+    private VBox labels;
+    private VBox text;
 
     @Override
     public void start(Stage stage) {
         controller = Controller.getInstance();
         generatedJson = new JSONObject();
         join = false;
+        correctDataType = false;
 
         StackPane root = new StackPane();
         HBox container = new HBox();
-        VBox labels = new VBox();
-        VBox text = new VBox();
+        labels = new VBox();
+        text = new VBox();
 
         labels.setAlignment(Pos.CENTER_LEFT);
         labels.setSpacing(20);
-
 
         text.setAlignment(Pos.CENTER_LEFT);
         text.setSpacing(10);
@@ -53,9 +56,6 @@ public class NewData extends Application {
         container.setSpacing(10);
 
         JSONObject actualScheme = controller.getSelectedScheme(); //estructura
-
-
-
 
 
         JSONArray attrNames =  controller.getSelectedSchemeAttr();
@@ -70,16 +70,77 @@ public class NewData extends Application {
 
         //////
         String actualPkAttr = actualScheme.getString("primaryKey");
-        posOfPk = -1;
-        for(int i=0; i<attrNames.length(); i++){
-            if (attrNames.get(i).equals(actualPkAttr)){
-                posOfPk = i;
-            }
-        }
+
+        posOfPk = foundPosOfPk(attrNames, actualPkAttr);
+
         //////
 
-        //agregar datos a combobox
+        //agregar attributos a la ventana
 
+        addWidgetsToLayout(attrNames, attrType, attrSize, localCollections);
+
+
+
+
+
+        ImageView saveButton = new ImageView(loadImg("res/images/save.png"));
+        saveButton.setFitWidth(60);
+        saveButton.setFitHeight(60);
+        saveButton.setOnMouseClicked(mouseEvent -> {
+            System.out.println("Saving records...");
+            System.out.println(generatedJson);
+
+            JSONArray attr = new JSONArray();
+            String attribute = "";
+
+
+            for (int i=0; i<text.getChildren().size(); i++) {
+
+                attribute = getAttribute(text, i);
+
+
+                //TODO verificar tamaño del dato
+
+
+                boolean numeric = StringUtils.isNumeric(attribute);
+                String attriType = attrType.getString(i);
+                String name = attrNames.getString(i);
+                correctDataType = checkDataType(numeric, attriType, name, attribute);
+
+
+                if (correctDataType)
+                    attr.put(attribute);
+                else
+                    return;
+            }
+
+            boolean foundPkInCollection = foundPk(attr, actualCollectionScheme);
+
+            if (!foundPkInCollection) {
+                generatedJson.put("action", "insertData");
+                generatedJson.put("schemeName", actualSchemeName);
+                generatedJson.put("attr", attr);
+                controller.insertData(generatedJson);
+                stage.close();
+            } else {
+                showAlert("No se permiten llaves primarias duplicadas, cambie el valor de : " + actualPkAttr, Alert.AlertType.ERROR);
+            }
+
+        });
+
+//        container.add(saveButton,1,attrNames.length());
+        container.getChildren().addAll(labels, text, saveButton);
+
+        root.getChildren().add(container);
+        Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        stage.setScene(scene);
+        stage.setTitle("Agregar nuevos registros");
+        stage.show();
+
+    }
+
+    private void addWidgetsToLayout(JSONArray attrNames, JSONArray attrType, JSONArray attrSize, Hashtable<String, Hashtable<String, JSONArray>> localCollections) {
         for(int i=0; i < attrNames.length(); i++){
             Label attribute = new Label();
             attribute.setText(attrNames.getString(i));
@@ -112,113 +173,96 @@ public class NewData extends Application {
                 text.getChildren().add(textFieldAttribute);
             }
         }
+    }
 
+    private int foundPosOfPk(JSONArray attrNames, String actualPkAttr) {
+        for(int i=0; i<attrNames.length(); i++){
+            if (attrNames.get(i).equals(actualPkAttr)){
+                posOfPk = i;
+            }
+        }
+        return -1;
+    }
 
+    private String getAttribute(VBox text, int i) {
+        if (!join) {
+            TextField data = (TextField) text.getChildren().get(i);
+            return data.getText();
 
-        ImageView saveButton = new ImageView(loadImg("res/images/save.png"));
-        saveButton.setFitWidth(60);
-        saveButton.setFitHeight(60);
-        saveButton.setOnMouseClicked(mouseEvent -> {
-            System.out.println("Saving records...");
-            System.out.println(generatedJson);
+        } else {
+            try {
+                TextField data = (TextField) text.getChildren().get(i);
+                return data.getText();
+            } catch (Exception e) {
+                ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
+                return collectionId.getSelectionModel().getSelectedItem();
+            }
+        }
+    }
 
-            JSONArray attr = new JSONArray();
-            String attribute = "";
+    private boolean checkDataType(boolean numeric, String attriType, String name, String attribute) {
+        if (attriType.equals("string") && numeric) {
+            showAlert("El atributo " + name + " debe ser de tipo string", Alert.AlertType.ERROR);
+            return false;
 
-            String pk = "";
+        } else if (attriType.equals("string") && !numeric) {
+            return true;
 
-            for (int i=0; i<text.getChildren().size(); i++) {
-                if (!join) {
-                    TextField data = (TextField) text.getChildren().get(i);
-                    attribute = data.getText();
-
+        } else if (attriType.equals("int") || attriType.equals("long")){
+            if (numeric) {
+                if (attriType.equals("int")){
+                    try {
+                        Integer.parseInt(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo entero", Alert.AlertType.ERROR);
+                        return false;
+                    }
                 } else {
                     try {
-                        TextField data = (TextField) text.getChildren().get(i);
-                        attribute = data.getText();
-                    } catch (Exception e) {
-                        ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
-                        attribute = collectionId.getValue();
+                        Long.parseLong(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo long", Alert.AlertType.ERROR);
+                        return false;
                     }
                 }
-
-                if (attribute.equals(pk)) {
-                    for (String key : actualCollectionScheme.keySet()) {
-                        if (key.equals(attribute)) {
-                            showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
-                            return;
-                        }
-                    }
-                }
-
-                //TODO verificar tamaño del dato y tipo de dato
-
-//
-//                boolean numeric = StringUtils.isNumeric(attribute);
-//                String attriType = attrType.getString(i);
-//                boolean correct = false;
-//
-//                if (attriType.equals("string") && numeric) {
-//                    showAlert("El atributo " + attribute + " debe ser de tipo string", Alert.AlertType.ERROR);
-//
-//                } else if (attriType.equals("string") && !numeric) {
-//                    correct = true;
-//
-//                }else if (attriType.equals("int") || attriType.equals("long")){
-//                    if (numeric){
-//                        if (attribute.contains(".") || attribute.contains(",")){
-//                            showAlert("El atributo " + attribute + " no puede ser decimal", Alert.AlertType.ERROR);
-//                        } else {
-//
-//                        }
-//
-//                    } else {
-//                        showAlert("El atributo " + attribute + " debe ser de tipo numerico", Alert.AlertType.ERROR);
-//                    }
-//
-//
-//                } else if (attriType.equals("float") || attriType.equals("double")){
-//
-//
-//                }
-//
-
-
-                attr.put(attribute);
-
-
-
-            }
-
-            System.out.println("Attributes " + attr);
-
-            boolean foundPkInCollection = foundPk(attr, actualCollectionScheme);
-
-            if (!foundPkInCollection) {
-
-                generatedJson.put("action", "insertData");
-                generatedJson.put("schemeName", actualSchemeName);
-                generatedJson.put("attr", attr);
-
-
-                controller.insertData(generatedJson);
-                stage.close();
             } else {
-                showAlert("El valor en " + actualPkAttr + " ya existe", Alert.AlertType.ERROR);
+                showAlert("El atributo " + name + " no puede ser decimal ni string", Alert.AlertType.ERROR);
+                return false;
             }
+        } else if (attriType.equals("float") || attriType.equals("double")) {
+            if (numeric){
+                showAlert("El atributo " + name + " debe ser decimal", Alert.AlertType.ERROR);
+                return false;
+            } else {
+                //si no es numerico puede ser string, float o double
+                System.out.println("checking float or double");
 
-        });
+                attribute = attribute.replaceAll(",", ".");
 
-//        container.add(saveButton,1,attrNames.length());
-        container.getChildren().addAll(labels, text, saveButton);
+                if (attriType.equals("float")) {
+                    try {
+                        Float.parseFloat(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo flotante", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                } else {
+                    try {
+                        Double.parseDouble(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo double", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                }
 
-        root.getChildren().add(container);
-        Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        stage.setScene(scene);
-        stage.setTitle("Agregar nuevos registros");
-        stage.show();
-
+            }
+        }
+        return false;
     }
 
     private boolean foundPk(JSONArray attr, Hashtable<String, JSONArray> actualCollectionScheme) {
