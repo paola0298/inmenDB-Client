@@ -88,20 +88,23 @@ public class NewData extends Application {
 
                 //Se obtienen los valores de los textfields y combobox si hay.
                 attribute = getAttribute(text, i);
-
-                //TODO verificar tamaño del dato
+                String attriType = attrType.getString(i);
 
                 boolean numeric = StringUtils.isNumeric(attribute);
-
-                String attriType = attrType.getString(i);
                 String name = attrNames.getString(i);
 
-                correctDataType = checkDataType(numeric, attriType, name, attribute);
+                //TODO verificar tamaño del dato
+//                boolean correctLength = checkLength();
+                if (!text.getChildren().get(i).getUserData().equals("combobox")) {
+                    correctDataType = checkDataType(numeric, attriType, name, attribute);
 
-                if (correctDataType)
+                    if (correctDataType)
+                        attr.put(attribute);
+                    else
+                        return;
+                } else {
                     attr.put(attribute);
-                else
-                    return;
+                }
             }
 
             boolean foundPkInCollection = foundPk(attr, actualCollectionScheme);
@@ -143,18 +146,16 @@ public class NewData extends Application {
 
             if (attrType.get(i).equals("join")){
 
-                String joinScheme = attrSize.getString(i);
-                Hashtable<String, JSONArray> joinCollection = localCollections.get(joinScheme);
+                Hashtable<String, JSONArray> joinCollection = localCollections.get(attrSize.getString(i));
 
                 join = true;
                 ComboBox<String> collections = new ComboBox<>();
+                collections.setUserData("combobox");
 
                 if (joinCollection!=null && joinCollection.size()>0 ) {
                     for (String id : joinCollection.keySet()) {
                         collections.getItems().add(id);
-
                     }
-
                     text.getChildren().add(collections);
                 } else {
                     showAlert("No hay registros en el esquema con el que se hace join", Alert.AlertType.ERROR);
@@ -164,6 +165,7 @@ public class NewData extends Application {
             } else {
 
                 TextField textFieldAttribute = new TextField();
+                textFieldAttribute.setUserData("textField");
                 text.getChildren().add(textFieldAttribute);
             }
         }
@@ -180,19 +182,17 @@ public class NewData extends Application {
 
     private String getAttribute(VBox text, int i) {
         //TODO verificar el tipo de widget que es usando getUserData();
-        if (!join) {
+
+        String type = (String) text.getChildren().get(i).getUserData();
+
+        if (type.equals("combobox")) {
+            ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
+            return collectionId.getSelectionModel().getSelectedItem();
+        } else {
             TextField data = (TextField) text.getChildren().get(i);
             return data.getText();
-
-        } else {
-            try {
-                TextField data = (TextField) text.getChildren().get(i);
-                return data.getText();
-            } catch (Exception e) {
-                ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
-                return collectionId.getSelectionModel().getSelectedItem();
-            }
         }
+
     }
 
     private boolean checkDataType(boolean numeric, String attriType, String name, String attribute) {
