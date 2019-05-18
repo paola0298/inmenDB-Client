@@ -142,9 +142,9 @@ public class NewData extends Application {
                     }
                 }
 
-                if (attribute.equals(pk)){
-                    for (String key : actualCollectionScheme.keySet()){
-                        if (key.equals(attribute)){
+                if (attribute.equals(pk)) {
+                    for (String key : actualCollectionScheme.keySet()) {
+                        if (key.equals(attribute)) {
                             showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
                             return;
                         }
@@ -153,15 +153,35 @@ public class NewData extends Application {
 
                 //TODO verificar tamaño del dato y tipo de dato
 
-
-                boolean numeric = StringUtils.isNumeric(attribute);
-                String attriType = attrType.getString(i);
-
-                if (attriType.equals("string") && numeric) {
-
-
-                }
-
+//
+//                boolean numeric = StringUtils.isNumeric(attribute);
+//                String attriType = attrType.getString(i);
+//                boolean correct = false;
+//
+//                if (attriType.equals("string") && numeric) {
+//                    showAlert("El atributo " + attribute + " debe ser de tipo string", Alert.AlertType.ERROR);
+//
+//                } else if (attriType.equals("string") && !numeric) {
+//                    correct = true;
+//
+//                }else if (attriType.equals("int") || attriType.equals("long")){
+//                    if (numeric){
+//                        if (attribute.contains(".") || attribute.contains(",")){
+//                            showAlert("El atributo " + attribute + " no puede ser decimal", Alert.AlertType.ERROR);
+//                        } else {
+//
+//                        }
+//
+//                    } else {
+//                        showAlert("El atributo " + attribute + " debe ser de tipo numerico", Alert.AlertType.ERROR);
+//                    }
+//
+//
+//                } else if (attriType.equals("float") || attriType.equals("double")){
+//
+//
+//                }
+//
 
 
                 attr.put(attribute);
