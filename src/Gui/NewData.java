@@ -49,12 +49,9 @@ public class NewData extends Application {
         container.setSpacing(10);
 
         JSONObject actualScheme = controller.getSelectedScheme(); //estructura
-//        System.out.println("[NEWDATA] Actual scheme");
-//        System.out.println(actualScheme.toString(5));
 
 
-        JSONArray attrNames =  controller.getSelectedSchemeAttr();
-
+        JSONArray attrNames = actualScheme.getJSONArray("attrName");
         JSONArray attrType = actualScheme.getJSONArray("attrType");
         JSONArray attrSize = actualScheme.getJSONArray("attrSize");
 
@@ -66,6 +63,7 @@ public class NewData extends Application {
 
         //////
         String actualPkAttr = actualScheme.getString("primaryKey");
+
         posOfPk = foundPosOfPk(attrNames, actualPkAttr);
 
         //////
@@ -85,18 +83,19 @@ public class NewData extends Application {
             String attribute;
 
 
-            //Se obtienen los valores de los textfields y combobox si hay.
+
             for (int i=0; i<text.getChildren().size(); i++) {
 
-
+                //Se obtienen los valores de los textfields y combobox si hay.
                 attribute = getAttribute(text, i);
 
                 //TODO verificar tamaño del dato
 
-
                 boolean numeric = StringUtils.isNumeric(attribute);
+
                 String attriType = attrType.getString(i);
                 String name = attrNames.getString(i);
+
                 correctDataType = checkDataType(numeric, attriType, name, attribute);
 
                 if (correctDataType)
@@ -114,6 +113,7 @@ public class NewData extends Application {
 
                 controller.insertData(generatedJson);
                 stage.close();
+
             } else {
                 showAlert("No se permiten llaves primarias duplicadas, cambie el valor de : " + actualPkAttr, Alert.AlertType.ERROR);
             }
@@ -131,6 +131,8 @@ public class NewData extends Application {
         stage.show();
 
     }
+
+
 
     private void addWidgetsToLayout(JSONArray attrNames, JSONArray attrType, JSONArray attrSize, Hashtable<String, Hashtable<String, JSONArray>> localCollections) {
         for(int i=0; i < attrNames.length(); i++){
@@ -170,7 +172,7 @@ public class NewData extends Application {
     private int foundPosOfPk(JSONArray attrNames, String actualPkAttr) {
         for(int i=0; i<attrNames.length(); i++){
             if (attrNames.get(i).equals(actualPkAttr)){
-                posOfPk = i;
+                return i;
             }
         }
         return -1;
@@ -178,8 +180,6 @@ public class NewData extends Application {
 
     private String getAttribute(VBox text, int i) {
         //TODO verificar el tipo de widget que es usando getUserData();
-
-
         if (!join) {
             TextField data = (TextField) text.getChildren().get(i);
             return data.getText();
@@ -263,6 +263,8 @@ public class NewData extends Application {
     private boolean foundPk(JSONArray attr, Hashtable<String, JSONArray> actualCollectionScheme) {
         if (posOfPk!=-1){
             String actualPk = attr.getString(posOfPk);
+            System.out.println("actual pk " + actualPk);
+
             if (actualCollectionScheme != null) {
                 for (String key : actualCollectionScheme.keySet()) {
                     if (key.equals(actualPk)) {
