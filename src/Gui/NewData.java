@@ -2,6 +2,7 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,8 +27,6 @@ import java.util.LinkedHashMap;
 public class NewData extends Application {
     private static Controller controller;
     private JSONObject generatedJson;
-    private final int SCREEN_WIDTH = 600;
-    private final int SCREEN_HEIGHT = 400;
     private boolean join;
     private int posOfPk;
 
@@ -45,7 +44,6 @@ public class NewData extends Application {
         labels.setAlignment(Pos.CENTER_LEFT);
         labels.setSpacing(20);
 
-
         text.setAlignment(Pos.CENTER_LEFT);
         text.setSpacing(10);
 
@@ -53,20 +51,18 @@ public class NewData extends Application {
         container.setSpacing(10);
 
         JSONObject actualScheme = controller.getSelectedScheme(); //estructura
+//        System.out.println("[NEWDATA] Actual scheme");
+//        System.out.println(actualScheme.toString(5));
 
-
-
-
-
-        JSONArray attrNames =  controller.getSelectedSchemeAttr();
+        JSONArray attrNames = actualScheme.getJSONArray("attrName");
         JSONArray attrType = actualScheme.getJSONArray("attrType");
         JSONArray attrSize = actualScheme.getJSONArray("attrSize");
 
-        String actualSchemeName = controller.getActualSchemeName();
-        Hashtable<String, String> localSchemes = controller.getLocalSchemes();
-        Hashtable<String, Hashtable<String, JSONArray>> localCollections =  controller.getLocalCollections();
+        String actualSchemeName = actualScheme.getString("name");
 
+        Hashtable<String, Hashtable<String, JSONArray>> localCollections =  controller.getLocalCollections();
         Hashtable<String, JSONArray> actualCollectionScheme = localCollections.get(actualSchemeName);
+
 
         //////
         String actualPkAttr = actualScheme.getString("primaryKey");
@@ -77,42 +73,31 @@ public class NewData extends Application {
             }
         }
         //////
-
         //agregar datos a combobox
 
         for(int i=0; i < attrNames.length(); i++){
-            Label attribute = new Label();
-            attribute.setText(attrNames.getString(i));
+            Label attribute = new Label(attrNames.getString(i));
             attribute.setAlignment(Pos.CENTER);
             labels.getChildren().add(attribute);
 
             if (attrType.get(i).equals("join")){
-
-                String joinScheme = attrSize.getString(i);
-                Hashtable<String, JSONArray> joinCollection = localCollections.get(joinScheme);
-
                 join = true;
-                ComboBox<String> collections = new ComboBox<>();
+                Hashtable<String, JSONArray> joinCollection = localCollections.get(attrSize.getString(i));
 
-                if (joinCollection!=null && joinCollection.size()>0 ) {
-                    for (String id : joinCollection.keySet()) {
-                        collections.getItems().add(id);
-
-                    }
-
+                if (joinCollection != null && joinCollection.size() > 0) {
+                    ComboBox<String> collections = new ComboBox<>(FXCollections.observableArrayList(joinCollection.keySet()));
+                    collections.setUserData("join");
                     text.getChildren().add(collections);
                 } else {
                     showAlert("No hay registros en el esquema con el que se hace join", Alert.AlertType.ERROR);
                     return;
                 }
-
             } else {
-
-                TextField textFieldAttribute = new TextField();
-                text.getChildren().add(textFieldAttribute);
+                TextField textField = new TextField();
+                textField.setUserData("normal");
+                text.getChildren().add(textField);
             }
         }
-
 
 
         ImageView saveButton = new ImageView(loadImg("res/images/save.png"));
@@ -120,14 +105,15 @@ public class NewData extends Application {
         saveButton.setFitHeight(60);
         saveButton.setOnMouseClicked(mouseEvent -> {
             System.out.println("Saving records...");
-            System.out.println(generatedJson);
 
             JSONArray attr = new JSONArray();
-            String attribute = "";
+            String attribute;
 
             String pk = "";
 
+            //Se obtienen los valores de los textfields y combobox si hay.
             for (int i=0; i<text.getChildren().size(); i++) {
+                //TODO verificar el tipo de widget que es usando getUserData();
                 if (!join) {
                     TextField data = (TextField) text.getChildren().get(i);
                     attribute = data.getText();
@@ -153,21 +139,14 @@ public class NewData extends Application {
 
                 //TODO verificar tamaño del dato y tipo de dato
 
-
                 boolean numeric = StringUtils.isNumeric(attribute);
                 String attriType = attrType.getString(i);
 
                 if (attriType.equals("string") && numeric) {
-
-
+                    System.out.println("string && numeric");
                 }
 
-
-
                 attr.put(attribute);
-
-
-
             }
 
             System.out.println("Attributes " + attr);
@@ -179,7 +158,6 @@ public class NewData extends Application {
                 generatedJson.put("action", "insertData");
                 generatedJson.put("schemeName", actualSchemeName);
                 generatedJson.put("attr", attr);
-
 
                 controller.insertData(generatedJson);
                 stage.close();
@@ -193,7 +171,7 @@ public class NewData extends Application {
         container.getChildren().addAll(labels, text, saveButton);
 
         root.getChildren().add(container);
-        Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
+        Scene scene = new Scene(root, 600, 400);
 
         stage.setScene(scene);
         stage.setTitle("Agregar nuevos registros");
@@ -204,9 +182,7 @@ public class NewData extends Application {
     private boolean foundPk(JSONArray attr, Hashtable<String, JSONArray> actualCollectionScheme) {
         if (posOfPk!=-1){
             String actualPk = attr.getString(posOfPk);
-
             if (actualCollectionScheme != null) {
-
                 for (String key : actualCollectionScheme.keySet()) {
                     if (key.equals(actualPk)) {
                         return true;

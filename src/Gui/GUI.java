@@ -298,7 +298,7 @@ public class GUI extends Application{
         actualSchemeName.setText(schemeName);
     }
 
-    public void loadSchemeTableColumns(JSONObject scheme, Hashtable<String, JSONArray> collection) {
+    public void loadSchemeTableData(JSONObject scheme, Hashtable<String, JSONArray> collection) {
 
         System.out.println("Cargando columnas");
 
@@ -323,7 +323,18 @@ public class GUI extends Application{
             column.setPrefWidth(150);
             schemeDataTable.getColumns().add(column);
         }
+
         schemeDataTable.setItems(items);
+    }
+
+    public void showQueryData(JSONArray queryData) {
+        schemeDataTable.getItems().clear();
+
+        ObservableList<JSONArray> dataItems = FXCollections.observableArrayList();
+
+        for (int i=0; i<queryData.length(); i++) {
+            schemeDataTable.getItems().add(new JSONArray(queryData.getString(i)));
+        }
     }
 
     public String getSelectedSchemeName() {

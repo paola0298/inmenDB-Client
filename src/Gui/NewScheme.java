@@ -264,7 +264,7 @@ public class NewScheme extends Application {
         GridPane.setHalignment(attrSize, HPos.CENTER);
 
         if (!modifyScheme) {
-            System.out.println("Full control");
+//            System.out.println("Full control");
             RadioButton primary = new RadioButton();
             primary.setUserData(container.getRowCount());
             primary.setToggleGroup(primaryKeyGroup);

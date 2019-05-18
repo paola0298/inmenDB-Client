@@ -12,7 +12,6 @@ import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -141,7 +140,7 @@ public class Controller {
                 Hashtable<String, Hashtable<String, JSONArray>> updatedCollections = mapper.readValue(
                         response.getString("collections"), collectionsTypeRef);
 
-                mainGui.loadSchemeTableColumns(getSelectedScheme(), updatedCollections.get(getActualSchemeName()));
+                mainGui.loadSchemeTableData(getSelectedScheme(), updatedCollections.get(getActualSchemeName()));
 
                 mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
 
@@ -200,16 +199,12 @@ public class Controller {
         if (response.getString("status").equals("success")) {
             try {
                 TypeReference<Hashtable<String, JSONArray>> typeReference = new TypeReference<>() {};
-//                Hashtable<String, String> collection = mapper.readValue(response.getString("collection"), schemeTypeRef);
                 Hashtable<String, JSONArray> collection = mapper.readValue(response.getString("collection"), typeReference);
 
                 System.out.println("Colección a cargar: " + collection);
 
-                mainGui.loadSchemeTableColumns(new JSONObject(response.getString("scheme")), collection);
+                mainGui.loadSchemeTableData(new JSONObject(response.getString("scheme")), collection);
 
-//                if (collection != null) {
-//                    mainGui.loadDataToTable(collection);
-//                }
                 mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(time));
 
             } catch (IOException e) {
@@ -263,7 +258,7 @@ public class Controller {
                 localCollections = mapper.readValue(response.getString("collections"), collectionsTypeRef);
 
                 String actualScheme = getActualSchemeName();
-                mainGui.loadSchemeTableColumns(
+                mainGui.loadSchemeTableData(
                         new JSONObject(localSchemes.get(actualScheme)), localCollections.get(actualScheme));
                 mainGui.showMessage("Registro agregado correctamente - " + getFinalTime(startTime));
 
@@ -291,12 +286,24 @@ public class Controller {
             JSONObject schemeData = new JSONObject(response.getString("scheme"));
             JSONObject joinsData = new JSONObject(response.getString("join"));
 
-            System.out.println(schemeData.toString(2));
-            System.out.println(joinsData.toString(2));
+//            System.out.println(schemeData.toString(2));
+//            System.out.println(joinsData.toString(2));
+
+            System.out.println("[QUERY INFO]");
+            System.out.println("Scheme data");
+            System.out.println(schemeData.toString(5));
+            System.out.println("------------");
+            System.out.println("joinsData");
+            System.out.println(joinsData.toString(5));
+
+//            mainGui.showQueryData(schemeData.getJSONArray("attributes"));
+            mainGui.showQueryData(new JSONArray(schemeData.getString("attributes")));
+
+            mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(startTime));
 
         } else {
             System.out.println(response);
-
+            mainGui.showMessage("Ocurrió un error al recuperar los datos - " + getFinalTime(startTime));
 
         }
 
