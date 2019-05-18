@@ -2,26 +2,20 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
 
 
 public class NewData extends Application {
@@ -29,17 +23,21 @@ public class NewData extends Application {
     private JSONObject generatedJson;
     private boolean join;
     private int posOfPk;
+    private boolean correctDataType;
+    private VBox labels;
+    private VBox text;
 
     @Override
     public void start(Stage stage) {
         controller = Controller.getInstance();
         generatedJson = new JSONObject();
         join = false;
+        correctDataType = false;
 
         StackPane root = new StackPane();
         HBox container = new HBox();
-        VBox labels = new VBox();
-        VBox text = new VBox();
+        labels = new VBox();
+        text = new VBox();
 
         labels.setAlignment(Pos.CENTER_LEFT);
         labels.setSpacing(20);
@@ -54,7 +52,9 @@ public class NewData extends Application {
 //        System.out.println("[NEWDATA] Actual scheme");
 //        System.out.println(actualScheme.toString(5));
 
-        JSONArray attrNames = actualScheme.getJSONArray("attrName");
+
+        JSONArray attrNames =  controller.getSelectedSchemeAttr();
+
         JSONArray attrType = actualScheme.getJSONArray("attrType");
         JSONArray attrSize = actualScheme.getJSONArray("attrSize");
 
@@ -66,38 +66,13 @@ public class NewData extends Application {
 
         //////
         String actualPkAttr = actualScheme.getString("primaryKey");
-        posOfPk = -1;
-        for(int i=0; i<attrNames.length(); i++){
-            if (attrNames.get(i).equals(actualPkAttr)){
-                posOfPk = i;
-            }
-        }
+        posOfPk = foundPosOfPk(attrNames, actualPkAttr);
+
         //////
-        //agregar datos a combobox
 
-        for(int i=0; i < attrNames.length(); i++){
-            Label attribute = new Label(attrNames.getString(i));
-            attribute.setAlignment(Pos.CENTER);
-            labels.getChildren().add(attribute);
+        //agregar attributos a la ventana
 
-            if (attrType.get(i).equals("join")){
-                join = true;
-                Hashtable<String, JSONArray> joinCollection = localCollections.get(attrSize.getString(i));
-
-                if (joinCollection != null && joinCollection.size() > 0) {
-                    ComboBox<String> collections = new ComboBox<>(FXCollections.observableArrayList(joinCollection.keySet()));
-                    collections.setUserData("join");
-                    text.getChildren().add(collections);
-                } else {
-                    showAlert("No hay registros en el esquema con el que se hace join", Alert.AlertType.ERROR);
-                    return;
-                }
-            } else {
-                TextField textField = new TextField();
-                textField.setUserData("normal");
-                text.getChildren().add(textField);
-            }
-        }
+        addWidgetsToLayout(attrNames, attrType, attrSize, localCollections);
 
 
         ImageView saveButton = new ImageView(loadImg("res/images/save.png"));
@@ -109,45 +84,30 @@ public class NewData extends Application {
             JSONArray attr = new JSONArray();
             String attribute;
 
-            String pk = "";
 
             //Se obtienen los valores de los textfields y combobox si hay.
             for (int i=0; i<text.getChildren().size(); i++) {
-                //TODO verificar el tipo de widget que es usando getUserData();
-                if (!join) {
-                    TextField data = (TextField) text.getChildren().get(i);
-                    attribute = data.getText();
 
-                } else {
-                    try {
-                        TextField data = (TextField) text.getChildren().get(i);
-                        attribute = data.getText();
-                    } catch (Exception e) {
-                        ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
-                        attribute = collectionId.getValue();
-                    }
-                }
 
-                if (attribute.equals(pk)) {
-                    for (String key : actualCollectionScheme.keySet()) {
-                        if (key.equals(attribute)) {
-                            showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
-                            return;
-                        }
-                    }
-                }
+                attribute = getAttribute(text, i);
 
-                //TODO verificar tamaño del dato y tipo de dato
+                //TODO verificar tamaño del dato
 
-                attr.put(attribute);
+
+                boolean numeric = StringUtils.isNumeric(attribute);
+                String attriType = attrType.getString(i);
+                String name = attrNames.getString(i);
+                correctDataType = checkDataType(numeric, attriType, name, attribute);
+
+                if (correctDataType)
+                    attr.put(attribute);
+                else
+                    return;
             }
-
-            System.out.println("Attributes " + attr);
 
             boolean foundPkInCollection = foundPk(attr, actualCollectionScheme);
 
             if (!foundPkInCollection) {
-
                 generatedJson.put("action", "insertData");
                 generatedJson.put("schemeName", actualSchemeName);
                 generatedJson.put("attr", attr);
@@ -155,7 +115,7 @@ public class NewData extends Application {
                 controller.insertData(generatedJson);
                 stage.close();
             } else {
-                showAlert("El valor en " + actualPkAttr + " ya existe", Alert.AlertType.ERROR);
+                showAlert("No se permiten llaves primarias duplicadas, cambie el valor de : " + actualPkAttr, Alert.AlertType.ERROR);
             }
 
         });
@@ -170,6 +130,134 @@ public class NewData extends Application {
         stage.setTitle("Agregar nuevos registros");
         stage.show();
 
+    }
+
+    private void addWidgetsToLayout(JSONArray attrNames, JSONArray attrType, JSONArray attrSize, Hashtable<String, Hashtable<String, JSONArray>> localCollections) {
+        for(int i=0; i < attrNames.length(); i++){
+            Label attribute = new Label();
+            attribute.setText(attrNames.getString(i));
+            attribute.setAlignment(Pos.CENTER);
+            labels.getChildren().add(attribute);
+
+            if (attrType.get(i).equals("join")){
+
+                String joinScheme = attrSize.getString(i);
+                Hashtable<String, JSONArray> joinCollection = localCollections.get(joinScheme);
+
+                join = true;
+                ComboBox<String> collections = new ComboBox<>();
+
+                if (joinCollection!=null && joinCollection.size()>0 ) {
+                    for (String id : joinCollection.keySet()) {
+                        collections.getItems().add(id);
+
+                    }
+
+                    text.getChildren().add(collections);
+                } else {
+                    showAlert("No hay registros en el esquema con el que se hace join", Alert.AlertType.ERROR);
+                    return;
+                }
+
+            } else {
+
+                TextField textFieldAttribute = new TextField();
+                text.getChildren().add(textFieldAttribute);
+            }
+        }
+    }
+
+    private int foundPosOfPk(JSONArray attrNames, String actualPkAttr) {
+        for(int i=0; i<attrNames.length(); i++){
+            if (attrNames.get(i).equals(actualPkAttr)){
+                posOfPk = i;
+            }
+        }
+        return -1;
+    }
+
+    private String getAttribute(VBox text, int i) {
+        //TODO verificar el tipo de widget que es usando getUserData();
+
+
+        if (!join) {
+            TextField data = (TextField) text.getChildren().get(i);
+            return data.getText();
+
+        } else {
+            try {
+                TextField data = (TextField) text.getChildren().get(i);
+                return data.getText();
+            } catch (Exception e) {
+                ComboBox<String> collectionId = (ComboBox<String>) text.getChildren().get(i);
+                return collectionId.getSelectionModel().getSelectedItem();
+            }
+        }
+    }
+
+    private boolean checkDataType(boolean numeric, String attriType, String name, String attribute) {
+        if (attriType.equals("string") && numeric) {
+            showAlert("El atributo " + name + " debe ser de tipo string", Alert.AlertType.ERROR);
+            return false;
+
+        } else if (attriType.equals("string") && !numeric) {
+            return true;
+
+        } else if (attriType.equals("int") || attriType.equals("long")){
+            if (numeric) {
+                if (attriType.equals("int")){
+                    try {
+                        Integer.parseInt(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo entero", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                } else {
+                    try {
+                        Long.parseLong(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo long", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                }
+            } else {
+                showAlert("El atributo " + name + " no puede ser decimal ni string", Alert.AlertType.ERROR);
+                return false;
+            }
+        } else if (attriType.equals("float") || attriType.equals("double")) {
+            if (numeric){
+                showAlert("El atributo " + name + " debe ser decimal", Alert.AlertType.ERROR);
+                return false;
+            } else {
+                //si no es numerico puede ser string, float o double
+                System.out.println("checking float or double");
+
+                attribute = attribute.replaceAll(",", ".");
+
+                if (attriType.equals("float")) {
+                    try {
+                        Float.parseFloat(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo flotante", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                } else {
+                    try {
+                        Double.parseDouble(attribute);
+                        return true;
+                    } catch (Exception e){
+                        showAlert("El atributo " + name + " debe ser de tipo double", Alert.AlertType.ERROR);
+                        return false;
+                    }
+                }
+
+
+            }
+        }
+        return false;
     }
 
     private boolean foundPk(JSONArray attr, Hashtable<String, JSONArray> actualCollectionScheme) {
