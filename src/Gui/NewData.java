@@ -128,9 +128,9 @@ public class NewData extends Application {
                     }
                 }
 
-                if (attribute.equals(pk)){
-                    for (String key : actualCollectionScheme.keySet()){
-                        if (key.equals(attribute)){
+                if (attribute.equals(pk)) {
+                    for (String key : actualCollectionScheme.keySet()) {
+                        if (key.equals(attribute)) {
                             showAlert("No se permiten llaves primarias repetidas", Alert.AlertType.ERROR);
                             return;
                         }
@@ -138,13 +138,6 @@ public class NewData extends Application {
                 }
 
                 //TODO verificar tamaño del dato y tipo de dato
-
-                boolean numeric = StringUtils.isNumeric(attribute);
-                String attriType = attrType.getString(i);
-
-                if (attriType.equals("string") && numeric) {
-                    System.out.println("string && numeric");
-                }
 
                 attr.put(attribute);
             }
