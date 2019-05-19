@@ -93,10 +93,9 @@ public class NewData extends Application {
                 boolean numeric = StringUtils.isNumeric(attribute);
                 String name = attrNames.getString(i);
 
-                //TODO verificar tamaño del dato
-//                boolean correctLength = checkLength();
                 if (!text.getChildren().get(i).getUserData().equals("combobox")) {
-                    correctDataType = checkDataType(numeric, attriType, name, attribute);
+
+                    correctDataType = checkDataType(numeric, attriType, name, attribute, attrSize.getInt(i));
 
                     if (correctDataType)
                         attr.put(attribute);
@@ -195,67 +194,79 @@ public class NewData extends Application {
 
     }
 
-    private boolean checkDataType(boolean numeric, String attriType, String name, String attribute) {
-        if (attriType.equals("string") && numeric) {
-            showAlert("El atributo " + name + " debe ser de tipo string", Alert.AlertType.ERROR);
+    private boolean checkDataType(boolean numeric, String attriType, String name, String attribute, int attrSize) {
+
+        int attrLength = attribute.length();
+
+        System.out.println("Tamaño del dato ingresado " + attrLength);
+        System.out.println("Tamaño correcto " + attrSize);
+        if (attrLength <= attrSize) {
+
+            if (attriType.equals("string") && numeric) {
+                showAlert("El atributo " + name + " debe ser de tipo string", Alert.AlertType.ERROR);
+                return false;
+
+            } else if (attriType.equals("string") && !numeric) {
+                return true;
+
+
+            } else if (attriType.equals("int") || attriType.equals("long")) {
+                if (numeric) {
+                    if (attriType.equals("int")) {
+                        try {
+                            Integer.parseInt(attribute);
+                            return true;
+                        } catch (Exception e) {
+                            showAlert("El atributo " + name + " debe ser de tipo entero", Alert.AlertType.ERROR);
+                            return false;
+                        }
+                    } else {
+                        try {
+                            Long.parseLong(attribute);
+                            return true;
+                        } catch (Exception e) {
+                            showAlert("El atributo " + name + " debe ser de tipo long", Alert.AlertType.ERROR);
+                            return false;
+                        }
+                    }
+                } else {
+                    showAlert("El atributo " + name + " no puede ser decimal ni string", Alert.AlertType.ERROR);
+                    return false;
+                }
+            } else if (attriType.equals("float") || attriType.equals("double")) {
+                if (numeric) {
+                    showAlert("El atributo " + name + " debe ser decimal", Alert.AlertType.ERROR);
+                    return false;
+                } else {
+                    //si no es numerico puede ser string, float o double
+                    System.out.println("checking float or double");
+
+                    attribute = attribute.replaceAll(",", ".");
+
+                    if (attriType.equals("float")) {
+                        try {
+                            Float.parseFloat(attribute);
+                            return true;
+                        } catch (Exception e) {
+                            showAlert("El atributo " + name + " debe ser de tipo flotante", Alert.AlertType.ERROR);
+                            return false;
+                        }
+                    } else {
+                        try {
+                            Double.parseDouble(attribute);
+                            return true;
+                        } catch (Exception e) {
+                            showAlert("El atributo " + name + " debe ser de tipo double", Alert.AlertType.ERROR);
+                            return false;
+                        }
+                    }
+
+
+                }
+            }
+        } else {
+            showAlert("El tamaño del atributo " + name + " debe ser menor o igual a " + attrSize, Alert.AlertType.ERROR);
             return false;
-
-        } else if (attriType.equals("string") && !numeric) {
-            return true;
-
-        } else if (attriType.equals("int") || attriType.equals("long")){
-            if (numeric) {
-                if (attriType.equals("int")){
-                    try {
-                        Integer.parseInt(attribute);
-                        return true;
-                    } catch (Exception e){
-                        showAlert("El atributo " + name + " debe ser de tipo entero", Alert.AlertType.ERROR);
-                        return false;
-                    }
-                } else {
-                    try {
-                        Long.parseLong(attribute);
-                        return true;
-                    } catch (Exception e){
-                        showAlert("El atributo " + name + " debe ser de tipo long", Alert.AlertType.ERROR);
-                        return false;
-                    }
-                }
-            } else {
-                showAlert("El atributo " + name + " no puede ser decimal ni string", Alert.AlertType.ERROR);
-                return false;
-            }
-        } else if (attriType.equals("float") || attriType.equals("double")) {
-            if (numeric){
-                showAlert("El atributo " + name + " debe ser decimal", Alert.AlertType.ERROR);
-                return false;
-            } else {
-                //si no es numerico puede ser string, float o double
-                System.out.println("checking float or double");
-
-                attribute = attribute.replaceAll(",", ".");
-
-                if (attriType.equals("float")) {
-                    try {
-                        Float.parseFloat(attribute);
-                        return true;
-                    } catch (Exception e){
-                        showAlert("El atributo " + name + " debe ser de tipo flotante", Alert.AlertType.ERROR);
-                        return false;
-                    }
-                } else {
-                    try {
-                        Double.parseDouble(attribute);
-                        return true;
-                    } catch (Exception e){
-                        showAlert("El atributo " + name + " debe ser de tipo double", Alert.AlertType.ERROR);
-                        return false;
-                    }
-                }
-
-
-            }
         }
         return false;
     }
