@@ -241,6 +241,28 @@ public class NewScheme extends Application {
         }
     }
 
+    private SpinnerValueFactory.IntegerSpinnerValueFactory getSpinnerValueFactory(String type){
+        switch (type) {
+            case "string":
+                System.out.println("Selecting string");
+                return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1);
+            case "int":
+                System.out.println("Selecting int");
+                return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1);
+            case "float":
+                System.out.println("Selecting float");
+                return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 12, 1);
+            case "double":
+                System.out.println("Selecting double");
+                return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 22, 1);
+            case "long":
+                System.out.println("Selecting long");
+                return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 19, 1);
+        }
+        System.out.println("Selecting unknown");
+        return new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1000, 1);
+    }
+
     /**
      * Método encargado de generar los elementos de la interfaz necesarios para agregar un atributo de los
      * tipos convencionales.
@@ -255,9 +277,10 @@ public class NewScheme extends Application {
         attrType.getSelectionModel().select(0);
 
         Spinner<Integer> attrSize = new Spinner<>();
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5000, 1);
-        attrSize.setValueFactory(valueFactory);
+        attrSize.setValueFactory(getSpinnerValueFactory("int"));
         attrSize.setEditable(true);
+
+        attrType.setOnAction(actionEvent -> attrSize.setValueFactory(getSpinnerValueFactory(attrType.getSelectionModel().getSelectedItem())));
 
         GridPane.setHalignment(attrName, HPos.CENTER);
         GridPane.setHalignment(attrType, HPos.CENTER);
