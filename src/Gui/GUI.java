@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
@@ -308,18 +309,14 @@ public class GUI extends Application{
             collection = new Hashtable<>();
         }
 
-        // [cedula, nombre, edad]
         JSONArray attributes = scheme.getJSONArray("attrName");
 
-        // [[402390083, Paola, 20], [122200589521, Marlon, 20]]
         ObservableList<JSONArray> items = FXCollections.observableArrayList(collection.values());
 
         for (int i=0; i<attributes.length(); i++) {
-            TableColumn<JSONArray, String> column = new TableColumn(attributes.getString(i));
+            TableColumn<JSONArray, String> column = new TableColumn<>(attributes.getString(i));
             int finalI = i;
-            column.setCellValueFactory(p -> {
-                return new SimpleStringProperty(p.getValue().getString(finalI));
-            });
+            column.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getString(finalI)));
             column.setPrefWidth(150);
             schemeDataTable.getColumns().add(column);
         }
@@ -330,11 +327,13 @@ public class GUI extends Application{
     public void showQueryData(JSONArray queryData) {
         schemeDataTable.getItems().clear();
 
-        ObservableList<JSONArray> dataItems = FXCollections.observableArrayList();
+
 
         for (int i=0; i<queryData.length(); i++) {
             schemeDataTable.getItems().add(new JSONArray(queryData.getString(i)));
         }
+
+
     }
 
     public String getSelectedSchemeName() {
@@ -360,7 +359,6 @@ public class GUI extends Application{
 
         Label messageLabel = new Label(message);
         messageLabel.setTextFill(Color.WHITE);
-//        messageLabel.setStyle("-fx-font-weight: bold;");
         messageLabel.setPadding(new Insets(0, 10, 0, 10));
 
         mainLayout.setBottom(messageContainer);
