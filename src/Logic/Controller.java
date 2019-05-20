@@ -286,9 +286,6 @@ public class Controller {
             JSONObject schemeData = new JSONObject(response.getString("scheme"));
             JSONObject joinsData = new JSONObject(response.getString("join"));
 
-//            System.out.println(schemeData.toString(2));
-//            System.out.println(joinsData.toString(2));
-
             System.out.println("[QUERY INFO]");
             System.out.println("Scheme data");
             System.out.println(schemeData.toString(5));
@@ -296,7 +293,6 @@ public class Controller {
             System.out.println("joinsData");
             System.out.println(joinsData.toString(5));
 
-//            mainGui.showQueryData(schemeData.getJSONArray("attributes"));
             mainGui.showQueryData(new JSONArray(schemeData.getString("attributes")));
 
             mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(startTime));
