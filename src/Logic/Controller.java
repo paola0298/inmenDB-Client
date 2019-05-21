@@ -1,10 +1,7 @@
 package Logic;
 
 import Connection.Client;
-import Gui.GUI;
-import Gui.NewData;
-import Gui.NewScheme;
-import Gui.querySchemeCollection;
+import Gui.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
@@ -308,6 +305,10 @@ public class Controller {
         }
 
 
+    }
+
+    public void newIndex() {
+        NewIndex.newIndex();
     }
 
     public Hashtable<String, Hashtable<String, JSONArray>> getLocalCollections() {
