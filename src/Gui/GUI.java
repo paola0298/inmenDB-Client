@@ -105,6 +105,7 @@ public class GUI extends Application{
         addIndex.setFitWidth(25);
         addIndex.setOnMouseClicked(mouseEvent -> {
             System.out.println("Add index..");
+            controller.newIndex();
         });
         addIndexContainer.getChildren().add(addIndex);
         indexHeader.getChildren().addAll(indexTitle, addIndexContainer);
