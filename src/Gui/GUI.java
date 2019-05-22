@@ -105,7 +105,11 @@ public class GUI extends Application{
         addIndex.setFitWidth(25);
         addIndex.setOnMouseClicked(mouseEvent -> {
             System.out.println("Add index..");
-            controller.newIndex();
+            if (!getSelectedSchemeName().equals("Selecciona un esquema")) {
+                controller.newIndex();
+            } else {
+                showAlert("Por favor seleccione un esquema", Alert.AlertType.INFORMATION);
+            }
         });
         addIndexContainer.getChildren().add(addIndex);
         indexHeader.getChildren().addAll(indexTitle, addIndexContainer);
@@ -203,6 +207,17 @@ public class GUI extends Application{
         stage.show();
 
         controller.getUpdatedData();
+    }
+
+    /**
+     * Éste método se encarga de mostrar una alerta al usuario.
+     * @param message Mensaje de la alerta.
+     * @param type Tipo de alerta (Info, Error..).
+     */
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type, message, ButtonType.OK);
+        alert.setHeaderText(null);
+        alert.show();
     }
 
     private void deleteSelectedRecords() {
