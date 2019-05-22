@@ -92,7 +92,6 @@ public class NewScheme extends Application {
         ContextMenu cm = new ContextMenu();
         MenuItem normalItem = new MenuItem("Normal");
         normalItem.setOnAction(actionEvent -> addAttribute(attrGrid));
-
         MenuItem joinItem = new MenuItem("Join");
         joinItem.setOnAction(actionEvent -> {
             if (!controller.getLocalSchemes().isEmpty()) {
@@ -101,6 +100,7 @@ public class NewScheme extends Application {
                 showAlert("No hay esquemas disponibles", Alert.AlertType.INFORMATION);
             }
         });
+
         cm.getItems().addAll(normalItem, joinItem);
         addButton.setOnMouseClicked(mouseEvent -> {
             if (!cm.isShowing()) cm.show(addButton, mouseEvent.getScreenX(), mouseEvent.getScreenY());
@@ -130,7 +130,7 @@ public class NewScheme extends Application {
             if (attrGrid.getRowCount() > 1) {
                 if (!schemeNameField.getText().isBlank()) {
                     if (createJson(attrGrid)) {
-                        controller.sendScheme(generatedJson);
+                        controller.sendNewScheme(generatedJson);
                         stage.close();
                     } else {
 
@@ -188,6 +188,7 @@ public class NewScheme extends Application {
      */
     private void showAlert(String message, Alert.AlertType type) {
         Alert alert = new Alert(type, message, ButtonType.OK);
+        alert.setWidth(500);
         alert.setHeaderText(null);
         alert.show();
     }
