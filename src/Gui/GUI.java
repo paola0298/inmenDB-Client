@@ -26,6 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Hashtable;
+import java.util.Set;
 
 public class GUI extends Application{
     private Controller controller;
@@ -121,6 +122,7 @@ public class GUI extends Application{
         indexList = new VBox();
         indexList.setPadding(new Insets(5));
         VBox.setVgrow(indexList, Priority.ALWAYS);
+        indexWrapper.setContent(indexList);
         indexContainer.getChildren().addAll(indexHeader, indexWrapper);
 
         sidePanel.getChildren().addAll(schemesContainer, indexContainer);
@@ -158,6 +160,7 @@ public class GUI extends Application{
         deleteRecords.setOnMouseClicked(mouseEvent -> {
             System.out.println("Delete selected records of " + actualSchemeName.getText());
             deleteSelectedRecords();
+
         });
         ImageView addRegisterButton = new ImageView(loadImg("res/images/plus.png"));
         addRegisterButton.setFitWidth(28);
@@ -259,7 +262,6 @@ public class GUI extends Application{
      */
     public void loadSchemesList(Hashtable<String, String> schemes) {
         schemesList.getChildren().clear();
-        boolean sep = false;
 
         for (String schemeName: schemes.keySet()) {
             HBox row = new HBox();
@@ -267,6 +269,7 @@ public class GUI extends Application{
 
             ContextMenu menu = new ContextMenu();
             MenuItem itemDelete = new MenuItem("Eliminar");
+            //todo actualizar la ventana principal para que no aparezca la informacion del esquema
             itemDelete.setOnAction(actionEvent -> deleteScheme(schemeName));
             menu.getItems().addAll(itemDelete);
 
@@ -287,20 +290,72 @@ public class GUI extends Application{
                     schemeDataContainer.toFront();
                     System.out.println("Consultando datos del esquema");
                     querySchemeData(schemeName);
+                    //todo mostrar indices relacionados
+
+                    loadIndexList(controller.getListOfIndex(), schemeName);
                 }
             });
 
             Label schemeLabel = new Label(schemeName);
             row.getChildren().add(schemeLabel);
 
-            if (!sep) {
-                Platform.runLater(() -> schemesList.getChildren().add(row));
-                sep = true;
-            } else {
-                Platform.runLater(() -> schemesList.getChildren().addAll(new Separator(), row));
-                sep = false;
+            Platform.runLater(() -> schemesList.getChildren().addAll(new Separator(), row));
+
+            }
+    }
+
+
+    private void loadIndexList(JSONObject indexArray, String schemeName) {
+        indexList.getChildren().clear();
+        Set<String> keySet = indexArray.keySet();
+        if (keySet.size() > 0) {
+            for (String key : keySet) {
+                System.out.println("key " + key + " schemeName " + schemeName);
+                System.out.println("key.equals(schemeName) " + key.equals(schemeName));
+                if (key.equals(schemeName)){
+                    JSONArray actualIndexList = indexArray.getJSONArray(key);
+
+                    for (int i=0; i<actualIndexList.length(); i++){
+
+                        JSONArray innerList = actualIndexList.getJSONArray(i);
+
+                        String indexName = innerList.getString(0);
+                        System.out.println("adding " + indexName);
+                        HBox row = new HBox();
+                        row.setAlignment(Pos.CENTER_LEFT);
+
+                        ContextMenu menu = new ContextMenu();
+                        MenuItem itemDelete = new MenuItem("Eliminar");
+                        itemDelete.setOnAction(actionEvent -> deleteIndex(indexName, schemeName));
+                        menu.getItems().addAll(itemDelete);
+
+                        row.setOnMouseEntered(mouseEvent -> {
+                            row.setStyle("-fx-background-color: #dbdbdb;");
+                        });
+                        row.setOnMouseExited(mouseEvent -> {
+                            row.setStyle("-fx-background-color: transparent;");
+                        });
+
+                        Label indexLabel = new Label(indexName);
+                        row.getChildren().add(indexLabel);
+
+                        Platform.runLater(() -> indexList.getChildren().addAll(new Separator(), row));
+
+
+                    }
+                    break;
+                }
             }
         }
+
+
+
+
+
+
+    }
+
+    private void deleteIndex(String indexName, String schemeName) {
     }
 
     private void deleteScheme(String schemeName) {
