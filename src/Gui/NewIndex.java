@@ -21,13 +21,14 @@ public class NewIndex extends Application {
 
     private static Controller controller;
     private static JSONObject generatedJson;
-    private String actualSchemeName = controller.getActualSchemeName();
+    private String actualSchemeName;
 
 
     @Override
     public void start(Stage stage) {
         controller = Controller.getInstance();
         generatedJson = new JSONObject();
+        actualSchemeName = controller.getActualSchemeName();
 
         GridPane mainLayout = new GridPane();
 
