@@ -7,14 +7,13 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -22,6 +21,7 @@ public class NewIndex extends Application {
 
     private static Controller controller;
     private static JSONObject generatedJson;
+    private String actualSchemeName = controller.getActualSchemeName();
 
 
     @Override
@@ -31,14 +31,14 @@ public class NewIndex extends Application {
 
         GridPane mainLayout = new GridPane();
 
-        Label title  = new Label("Crear índice de " ); //+ controller.getActualSchemeName()
+        Label title  = new Label("Crear índice del esquema: " + actualSchemeName);
 
         Label nameLabel = new Label("Nombre");
         TextField nameTextField = new TextField();
 
         Label attrLabel = new Label("Atributo");
         ComboBox<String> attrComboBox = new ComboBox<>();
-        //TODO cargar atributos del esquema seleccionado
+        loadAttr(attrComboBox);
 
         Label treeLabel = new Label("Árbol");
         ComboBox<String> treeComboBox = new ComboBox<>(FXCollections.observableArrayList("AA", "AVL", "Binario",
@@ -47,6 +47,18 @@ public class NewIndex extends Application {
         ImageView saveButton = new ImageView(loadImg("res/images/save.png"));
         saveButton.setFitWidth(60);
         saveButton.setFitHeight(60);
+        saveButton.setOnMouseClicked(mouseEvent -> {
+            String indexName = nameTextField.getText();
+            String column = attrComboBox.getSelectionModel().getSelectedItem();
+            String tree = treeComboBox.getSelectionModel().getSelectedItem();
+
+            if (checkEntry(indexName, column, tree)){
+                generateJson(indexName, column, tree);
+                controller.createIndex(generatedJson);
+                stage.close();
+            }
+        });
+
 
         ImageView background = new ImageView(loadImg("res/images/index.png"));
         background.setFitWidth(150);
@@ -88,9 +100,53 @@ public class NewIndex extends Application {
 
     }
 
+    private void generateJson(String indexName, String column, String tree) {
+        generatedJson = new JSONObject();
+        generatedJson.put("action", "createIndex");
+        generatedJson.put("scheme", actualSchemeName);
+        generatedJson.put("indexName", indexName);
+        generatedJson.put("attr", column);
+        generatedJson.put("tree", tree);
+    }
+
+    private boolean checkEntry(String indexName, String column, String tree) {
+        if (indexName.isBlank()) {
+            showAlert("Debe ingresar un nombre", Alert.AlertType.ERROR);
+            return false;
+        }
+        if (column.isBlank()) {
+            showAlert("Debe seleccionar un atributo", Alert.AlertType.ERROR);
+            return false;
+        }
+        if (tree.isBlank()) {
+            showAlert("Debe seleccionar un árbol", Alert.AlertType.ERROR);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void loadAttr(ComboBox<String> attrComboBox) {
+        JSONArray names = controller.getSelectedSchemeAttr();
+        for (int i=0; i<names.length(); i++) {
+            attrComboBox.getItems().add(names.getString(i));
+        }
+    }
+
     private javafx.scene.image.Image loadImg(String relativePath) {
         String cwd = System.getProperty("user.dir");
         return new Image("file://" + cwd + "/" + relativePath);
+    }
+
+    /**
+     * Éste método se encarga de mostrar una alerta al usuario.
+     * @param message Mensaje de la alerta.
+     * @param type Tipo de alerta (Info, Error..).
+     */
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type, message, ButtonType.OK);
+        alert.setHeaderText(null);
+        alert.show();
     }
 
     /**
