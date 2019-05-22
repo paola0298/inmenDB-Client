@@ -1,0 +1,41 @@
+{
+  "actualScheme": {
+    "name": "Curso",
+    "attrName": ["Código", "Profesor", "Materia", "Capacidad"],
+    "attrType": ["string", "join", "join", "int"],
+    "attrSize": [8, "Persona", "Materia", 2],
+    "primaryKey": "Código"
+  },
+  "joinSchemes": {
+    "Profesor": {
+      "name": "Profesor",
+      "attrName": ["Nombre", "Cédula", "Edad"],
+      "attrType": ["string", "long", "int"],
+      "attrSize": [25, 12, 2],
+      "primaryKey": "Cédula"
+    },
+    "Materia":{
+      "name": "Materia",
+      "attrName": ["Nombre", "Tipo"],
+      "attrType": ["string", "string"],
+      "attrSize": [25, 12],
+      "primaryKey": "Nombre"
+    }
+  },
+  "tableItems": [
+    {
+      "normal": ["CE1200", "402390083", "Intro a la progra", "40"],
+      "join": [
+        ["Paola", "402390083", "20"],
+        ["Intro a la progra", "Programación"]
+      ]
+    },
+    {
+      "normal": ["CE1510", "122200589521", "Taller de progra", "25"],
+      "join": [
+        ["Marlon", "122200589521", "20"],
+        ["Taller de progra", "Programación"]
+      ]
+    }
+  ]
+}
