@@ -180,7 +180,6 @@ public class NewData extends Application {
     }
 
     private String getAttribute(VBox text, int i) {
-        //TODO verificar el tipo de widget que es usando getUserData();
 
         String type = (String) text.getChildren().get(i).getUserData();
 

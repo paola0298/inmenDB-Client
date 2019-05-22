@@ -1,10 +1,7 @@
 package Logic;
 
 import Connection.Client;
-import Gui.GUI;
-import Gui.NewData;
-import Gui.NewScheme;
-import Gui.querySchemeCollection;
+import Gui.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
@@ -29,6 +26,7 @@ public class Controller {
 
     private Hashtable<String, String> localSchemes;
     private Hashtable<String, Hashtable<String, JSONArray>> localCollections;
+
     private ObjectMapper mapper;
 
     private TypeReference<Hashtable<String, String>> schemeTypeRef = new TypeReference<>() {};
@@ -135,14 +133,27 @@ public class Controller {
 
         JSONObject response = client.connect(action);
 
+
         if (response.getString("status").equals("success")) {
+            String deleted = response.getString("deleted");
             try {
                 Hashtable<String, Hashtable<String, JSONArray>> updatedCollections = mapper.readValue(
                         response.getString("collections"), collectionsTypeRef);
 
                 mainGui.loadSchemeTableData(getSelectedScheme(), updatedCollections.get(getActualSchemeName()));
 
-                mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
+                switch (deleted){
+                    case "all":
+                        mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
+                        break;
+                    case "some":
+                        mainGui.showMessage("Algunos registros no se puedieron eliminar - " + getFinalTime(startTime));
+                        break;
+                    case "none":
+                        mainGui.showMessage("No se pudieron eliminar los registros - " + getFinalTime(startTime));
+                        break;
+                }
+
 
                 localCollections = updatedCollections;
 
@@ -217,6 +228,7 @@ public class Controller {
     }
 
     public String getActualSchemeName() {
+        System.out.println("Actual scheme name " + mainGui.getSelectedSchemeName());
         return mainGui.getSelectedSchemeName();
     }
 
@@ -309,6 +321,35 @@ public class Controller {
 
 
     }
+
+    public void newIndex() {
+        NewIndex.newIndex();
+    }
+
+    public void createIndex(JSONObject generatedJson) {
+        double startTime = System.currentTimeMillis();
+
+        JSONObject response = client.connect(generatedJson);
+        if (response.getString("status").equals("success")) {
+
+            mainGui.showMessage("Indice creado exitosamente - " + getFinalTime(startTime));
+        }
+
+        System.out.println(response);
+
+    }
+
+    public JSONObject getListOfIndex(){
+        JSONObject query = new JSONObject();
+        query.put("action", "getIndexList");
+        JSONObject response = client.connect(query);
+        if (response.getString("status").equals("success")){
+            return response.getJSONObject("list");
+        }
+        return null;
+    }
+
+
 
     public Hashtable<String, Hashtable<String, JSONArray>> getLocalCollections() {
         System.out.println("local collections in controller " + localCollections);
