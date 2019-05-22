@@ -2,6 +2,7 @@ package Gui;
 
 import Logic.Controller;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -20,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Clase que muestra la interfaz necesaria para realizar busquedas en los esquemas creados
@@ -32,8 +34,11 @@ public class querySchemeCollection extends Application {
     private boolean join;
     private JSONObject generatedJson;
     private String joinName = null;
+    private String actualScheme;
     private final int SCREEN_WIDTH = 600;
     private final int SCREEN_HEIGHT = 400;
+    private ComboBox<String> actualIndex;
+    private String attrJoin;
 
     /**
      * Método que inicializa y configura la interfaz.
@@ -41,11 +46,16 @@ public class querySchemeCollection extends Application {
      */
     @Override
     public void start(Stage stage) {
+        controller = Controller.getInstance();
 
         generatedJson = new JSONObject();
         join = false;
+        actualScheme  = controller.getActualSchemeName();
 
-        this.controller = Controller.getInstance();
+
+        actualIndex = new ComboBox<>();
+        actualIndex.getItems().add("NO");
+        actualIndex.getSelectionModel().select(0);
 
         VBox container = new VBox();
 
@@ -105,6 +115,9 @@ public class querySchemeCollection extends Application {
         attrBox.getChildren().add(attrVBox);
 
         schemeAttr.setOnAction(actionEvent -> {
+            actualIndex.getItems().clear();
+            actualIndex.getItems().add("NO");
+            actualIndex.getSelectionModel().select(0);
             join = false;
             int size = attrBox.getChildren().size();
             if (size>1) {
@@ -114,22 +127,40 @@ public class querySchemeCollection extends Application {
             }
             int indexAttr = schemeAttr.getSelectionModel().getSelectedIndex();
             String atType = attrType.getString(indexAttr);
-            String atJoin = null;
+            attrJoin = null;
             if (atType.equals("join")){
-                atJoin = attrSize.getString(indexAttr);
-                joinName = atJoin;
+                attrJoin = attrSize.getString(indexAttr);
+                joinName = attrJoin;
                 System.out.println("La columna seleccionada es de tipo join");
                 join = true;
             }
             if (join) {
-                if (atJoin!=null){
-                    JSONObject schemeSelected = new JSONObject(localSchemes.get(atJoin));
+                if (attrJoin!=null){
+                    JSONObject schemeSelected = new JSONObject(localSchemes.get(attrJoin));
                     JSONArray attrNameJoin = schemeSelected.getJSONArray("attrName");
                     for (int j = 0; j < attrNameJoin.length(); j++) {
                         joinAttrComboBox.getItems().add(attrNameJoin.getString(j));
                     }
                     joinVBox.getChildren().addAll(joinAttrText, joinAttrComboBox);
                     attrBox.getChildren().add(joinVBox);
+
+
+                    joinAttrComboBox.setOnAction(actionEvent1 -> {
+                        JSONArray indexOfJoin = findIndex(true, joinAttrComboBox.getSelectionModel().getSelectedItem());
+                        for (int i=0; i<indexOfJoin.length(); i++){
+                            actualIndex.getItems().add(indexOfJoin.getString(i));
+                        }
+
+                        //true es si hay join attrjoin es el nombre del join
+
+                    });
+                    //todo buscar si el join tiene indice en la columna seleccionada combobox actualindex
+                }
+            } else {
+                //todo buscar si hay indice en la columna seleccionada combobox actualindex
+                JSONArray indexOfJoin = findIndex(false, schemeAttr.getSelectionModel().getSelectedItem());
+                for (int i=0; i<indexOfJoin.length(); i++){
+                    actualIndex.getItems().add(indexOfJoin.getString(i));
                 }
             }
             attrBox.getChildren().add(toSearchVBox);
@@ -139,8 +170,7 @@ public class querySchemeCollection extends Application {
 
         //Indicar si se desea buscar por indice
         Text indexText = new Text("Seleccione el indice por el cual \n   desea realizar la búsqueda");
-        ComboBox<String> actualIndex = new ComboBox<>();
-        actualIndex.getItems().add("NO");
+//        addIndex(actualIndex);
         //TODO colocar indices existentes de la columna seleccionada
         VBox indexVBox = new VBox();
         indexVBox.setAlignment(Pos.CENTER);
@@ -199,6 +229,57 @@ public class querySchemeCollection extends Application {
 
     }
 
+    private JSONArray findIndex(boolean join, String joinColumn) {
+        JSONObject indexCreated = controller.getListOfIndex();
+        JSONArray indexToAdd = new JSONArray();
+        Set<String> keySet = indexCreated.keySet();
+        if (keySet.size() > 0) {
+            for (String key : keySet) {
+
+                String scheme = null;
+
+                if (join)
+                    scheme = attrJoin;
+                else
+                    scheme = actualScheme;
+
+                if (key.equals(scheme)) {
+                    JSONArray actualIndexList = indexCreated.getJSONArray(key);
+
+                    for (int i = 0; i < actualIndexList.length(); i++) {
+
+                        JSONArray innerList = actualIndexList.getJSONArray(i);
+                        String column = innerList.getString(1);
+                        String indexName = innerList.getString(0);
+                        if (column.equals(joinColumn)){
+                            indexToAdd.put(indexName);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        return indexToAdd;
+    }
+
+    private void addIndex(ComboBox<String> actualIndexCombo) {
+        JSONObject indexArray = controller.getListOfIndex();
+        Set<String> keySet = indexArray.keySet();
+        if (keySet.size() > 0) {
+            for (String key : keySet) {
+                if (key.equals(actualScheme)) {
+                    JSONArray actualIndexList = indexArray.getJSONArray(key);
+
+                    for (int i = 0; i < actualIndexList.length(); i++) {
+                        actualIndexCombo.getItems().add(actualIndexList.getString(i));
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     private boolean generateJson(String attrEntryText, String attrComboBox, String indexComboBox, String joinCombobox,
                               ComboBox<String> joinAttrComboBox) {
         if (attrComboBox != null){
@@ -212,7 +293,7 @@ public class querySchemeCollection extends Application {
                     System.out.println("Enviando datos al servidor");
                     generatedJson.put("action", "queryData");
                     JSONObject parameters = new JSONObject();
-                    parameters.put("scheme", controller.getActualSchemeName());
+                    parameters.put("scheme", actualScheme);
                     if (!joinCombobox.isBlank()){
                         parameters.put("searchByJoin", true);
                         parameters.put("searchBy", joinCombobox);
