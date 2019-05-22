@@ -26,6 +26,7 @@ public class Controller {
 
     private Hashtable<String, String> localSchemes;
     private Hashtable<String, Hashtable<String, JSONArray>> localCollections;
+
     private ObjectMapper mapper;
 
     private TypeReference<Hashtable<String, String>> schemeTypeRef = new TypeReference<>() {};
@@ -227,6 +228,7 @@ public class Controller {
     }
 
     public String getActualSchemeName() {
+        System.out.println("Actual scheme name " + mainGui.getSelectedSchemeName());
         return mainGui.getSelectedSchemeName();
     }
 
@@ -328,10 +330,26 @@ public class Controller {
         double startTime = System.currentTimeMillis();
 
         JSONObject response = client.connect(generatedJson);
+        if (response.getString("status").equals("success")) {
+
+            mainGui.showMessage("Indice creado exitosamente - " + getFinalTime(startTime));
+        }
 
         System.out.println(response);
 
     }
+
+    public JSONObject getListOfIndex(){
+        JSONObject query = new JSONObject();
+        query.put("action", "getIndexList");
+        JSONObject response = client.connect(query);
+        if (response.getString("status").equals("success")){
+            return response.getJSONObject("list");
+        }
+        return null;
+    }
+
+
 
     public Hashtable<String, Hashtable<String, JSONArray>> getLocalCollections() {
         System.out.println("local collections in controller " + localCollections);
