@@ -333,6 +333,9 @@ public class Controller {
         if (response.getString("status").equals("success")) {
 
             mainGui.showMessage("Indice creado exitosamente - " + getFinalTime(startTime));
+        } else {
+            mainGui.showMessage("Ocurrió un error al crear el índice - " + getFinalTime(startTime));
+
         }
 
         System.out.println(response);
@@ -379,6 +382,25 @@ public class Controller {
             this.client = new Client(host, port);
         } catch (IOException e) {
             System.out.println("[Error] Could not read settings");
+        }
+    }
+
+    public void deleteIndex(String indexName, String schemeName) {
+        JSONObject toSend = new JSONObject();
+        toSend.put("action", "deleteIndex");
+        toSend.put("scheme", schemeName);
+        toSend.put("indexName", indexName);
+
+        double startTime = System.currentTimeMillis();
+
+        JSONObject response = client.connect(toSend);
+
+        if (response.getString("status").equals("success")){
+            mainGui.showMessage("Indice eliminado correctamente - " + getFinalTime(startTime));
+
+        } else {
+            mainGui.showMessage("Ocurrió un error al eliminar el índice - " + getFinalTime(startTime));
+
         }
     }
 }
