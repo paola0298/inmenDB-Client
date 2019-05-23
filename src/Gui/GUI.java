@@ -292,7 +292,10 @@ public class GUI extends Application{
                     querySchemeData(schemeName);
                     //todo mostrar indices relacionados
 
-                    loadIndexList(controller.getListOfIndex(), schemeName);
+                    System.out.println(controller.getListOfIndex());
+
+                    if (controller.getListOfIndex().length()>0)
+                        loadIndexList(controller.getListOfIndex(), schemeName);
                 }
             });
 
@@ -326,8 +329,20 @@ public class GUI extends Application{
 
                         ContextMenu menu = new ContextMenu();
                         MenuItem itemDelete = new MenuItem("Eliminar");
-                        itemDelete.setOnAction(actionEvent -> deleteIndex(indexName, schemeName));
+                        itemDelete.setOnAction(actionEvent -> {
+                            System.out.println("Eliminando indice");
+                            deleteIndex(indexName, schemeName);
+                            loadIndexList(controller.getListOfIndex(), schemeName);
+                        });
                         menu.getItems().addAll(itemDelete);
+
+                        row.setOnMouseClicked(mouseEvent -> {
+                            if (!menu.isShowing()) {
+                                menu.show(row, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+                            } else {
+                                menu.hide();
+                            }
+                        });
 
                         row.setOnMouseEntered(mouseEvent -> {
                             row.setStyle("-fx-background-color: #dbdbdb;");
@@ -356,6 +371,8 @@ public class GUI extends Application{
     }
 
     private void deleteIndex(String indexName, String schemeName) {
+        System.out.println("Eliminando indice " + indexName + " en esquema " + schemeName);
+        controller.deleteIndex(indexName, schemeName);
     }
 
     private void deleteScheme(String schemeName) {
