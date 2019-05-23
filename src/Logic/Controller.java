@@ -331,20 +331,7 @@ public class Controller {
 //        System.out.println("response inserting data " + response.toString(2));
 
         if (response.getString("status").equals("success")) {
-            String deleted = response.getString("deleted");
             try {
-
-                switch (deleted){
-                    case "all":
-                        mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
-                        break;
-                    case "some":
-                        mainGui.showMessage("Algunos registros no se puedieron eliminar - " + getFinalTime(startTime));
-                        break;
-                    case "none":
-                        mainGui.showMessage("No se pudieron eliminar los registros - " + getFinalTime(startTime));
-                        break;
-                }
 
                 localCollections = mapper.readValue(response.getString("collections"), collectionsTypeRef);
 
@@ -406,7 +393,19 @@ public class Controller {
 
                 mainGui.showDataTable(data);
 
-                mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
+                String deleted = response.getString("deleted");
+
+                switch (deleted){
+                    case "all":
+                        mainGui.showMessage("Los registros se eliminaron correctamente - " + getFinalTime(startTime));
+                        break;
+                    case "some":
+                        mainGui.showMessage("Algunos registros no se puedieron eliminar - " + getFinalTime(startTime));
+                        break;
+                    case "none":
+                        mainGui.showMessage("No se pudieron eliminar los registros - " + getFinalTime(startTime));
+                        break;
+                }
 
             } catch (IOException e) {
                 mainGui.showMessage("Error al recibir los datos del servidor - " + getFinalTime(startTime));
@@ -453,32 +452,35 @@ public class Controller {
                 */
 
             JSONObject schemeData = new JSONObject(response.getString("scheme"));
-            JSONObject joinsData = new JSONObject(response.getString("join"));
+//            JSONObject joinsData = new JSONObject(response.getString("join"));
 
-            System.out.println("Scheme data:\n" + schemeData);
-            System.out.println("Join data:\n" + joinsData);
+//            System.out.println("Scheme data:\n" + schemeData);
+//            System.out.println("Join data:\n" + joinsData);
 
-//            JSONObject queryData = new JSONObject();
-//
-//            queryData.put("actualScheme", getScheme(
-//                    new JSONObject(queryToSend.getString("parameters")).getString("scheme")));
-//            JSONArray temp = joinsData.getJSONArray("joinName");
-//            queryData.put("joinScheme", getScheme(temp.getString(0)));
-//
-//            JSONArray tableItems = processQueryData(
-//                    new JSONArray(schemeData.getString("attributes")),
-//                    joinsData.getJSONArray("attributesJoin"));
-//
-//            queryData.put("tableItems", tableItems);
+            JSONObject actualScheme = getSelectedScheme();
+            JSONArray attrNames = actualScheme.getJSONArray("attrName");
+            String primaryKey = actualScheme.getString("primaryKey");
+
+            int pkIndex = 0;
+            for (int i=0; i<attrNames.length(); i++) {
+                if (attrNames.getString(i).equals(primaryKey)) {
+                    pkIndex = i;
+                }
+            }
+
+            JSONArray attributes = new JSONArray(schemeData.getString("attributes"));
+
+            Hashtable<String, JSONArray> collection = new Hashtable<>();
+
+            for (int i=0; i<attributes.length(); i++) {
+                JSONArray item = new JSONArray(attributes.getString(i));
+
+                collection.put(item.getString(pkIndex), item);
+            }
+
 
             JSONObject data = new JSONObject();
 
-
-            Hashtable<String, JSONArray> collection = new Hashtable<>();
-//                    mapper.readValue(response.getString("collection"), collectionTypeRef); //Registros normales
-
-
-            JSONObject actualScheme = getSelectedScheme();
             JSONObject joinSchemes = getJoinSchemes(actualScheme);
 
             JSONArray tableItems = generateTableItems(collection, joinSchemes, actualScheme);
@@ -489,15 +491,12 @@ public class Controller {
 
             mainGui.showDataTable(data);
 
-
             mainGui.showMessage("Datos recuperados correctamente - " + getFinalTime(startTime));
 
         } else {
             System.out.println(response);
             mainGui.showMessage("Ocurrió un error al recuperar los datos - " + getFinalTime(startTime));
         }
-//TODO
-
     }
 
     public void newIndex() {
