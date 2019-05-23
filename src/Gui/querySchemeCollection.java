@@ -214,8 +214,8 @@ public class querySchemeCollection extends Application {
         index.getChildren().addAll(indexVBox);
         button.setRight(searchButton);
         button.setLeft(lookinFor);
-        button.setAlignment(searchButton, Pos.BOTTOM_RIGHT);
-        button.setAlignment(lookinFor, Pos.CENTER_LEFT);
+        BorderPane.setAlignment(searchButton, Pos.BOTTOM_RIGHT);
+        BorderPane.setAlignment(lookinFor, Pos.CENTER_LEFT);
 
         container.getChildren().addAll(attrBox, index, button);
 

@@ -113,7 +113,7 @@ public class NewData extends Application {
                 generatedJson.put("schemeName", actualSchemeName);
                 generatedJson.put("attr", attr);
 
-                controller.insertData(generatedJson);
+                controller.sendNewRecord(generatedJson);
                 stage.close();
 
             } else {

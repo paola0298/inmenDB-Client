@@ -163,7 +163,7 @@ public class ServerClientTest {
         attr.put(pk);
         attr.put("20");
 
-        response.put("action", "insertData");
+        response.put("action", "createRecord");
         response.put("type", scheme);
         response.put("attr", attr);
 
@@ -178,7 +178,7 @@ public class ServerClientTest {
         attr.put("20");
         attr.put(join);
 
-        response.put("action", "insertData");
+        response.put("action", "createRecord");
         response.put("type", scheme);
         response.put("attr", attr);
 

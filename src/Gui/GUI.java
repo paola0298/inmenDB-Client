@@ -4,24 +4,17 @@ import Logic.Controller;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -34,11 +27,11 @@ public class GUI extends Application{
     private BorderPane mainLayout;
     private VBox schemesList;
     private VBox indexList;
-    private TableView<JSONArray> schemeDataTable;
+    private TableView<JSONObject> schemeDataTable;
     private Label actualSchemeName;
     private VBox schemeDataContainer;
 
-    private Thread messageThread;
+//    private Thread messageThread;
 
     public void start(Stage stage) {
         this.controller = Controller.getInstance();
@@ -73,7 +66,7 @@ public class GUI extends Application{
         addScheme.setFitWidth(25);
         addScheme.setOnMouseClicked(mouseEvent -> {
             System.out.println("Add scheme..");
-            this.controller.generateScheme();
+            this.controller.createScheme();
         });
         addSchemeContainer.getChildren().add(addScheme);
         schemeHeader.getChildren().addAll(schemesTitle, addSchemeContainer);
@@ -167,7 +160,7 @@ public class GUI extends Application{
         addRegisterButton.setFitHeight(28);
         addRegisterButton.setOnMouseClicked(mouseEvent -> {
             System.out.println("Add register in " + actualSchemeName.getText());
-            controller.insertData();
+            controller.createRecord();
 
         });
         ImageView searchButton =  new ImageView(loadImg("res/images/search.png"));
@@ -224,7 +217,7 @@ public class GUI extends Application{
     }
 
     private void deleteSelectedRecords() {
-        ObservableList<JSONArray> recordsToDelete = schemeDataTable.getSelectionModel().getSelectedItems();
+        ObservableList<JSONObject> recordsToDelete = schemeDataTable.getSelectionModel().getSelectedItems();
         if (recordsToDelete.size() > 0) {
 
             JSONArray primaryKeys = new JSONArray();
@@ -241,8 +234,9 @@ public class GUI extends Application{
                 }
             }
 
-            for (JSONArray registry: recordsToDelete) {
-                primaryKeys.put(registry.getString(pkIndex));
+            for (JSONObject registry: recordsToDelete) {
+//                primaryKeys.put(registry.getString(pkIndex));
+                primaryKeys.put(registry.getJSONArray("normal").getString(pkIndex));
             }
 
             this.controller.deleteRecords(primaryKeys);
@@ -364,47 +358,62 @@ public class GUI extends Application{
     }
 
     private void querySchemeData(String schemeName) {
-        controller.querySchemeData(schemeName);
-
         actualSchemeName.setText(schemeName);
+        controller.getSchemeRecords(schemeName);
     }
 
-    public void loadSchemeTableData(JSONObject scheme, Hashtable<String, JSONArray> collection) {
-
-        System.out.println("Cargando columnas");
-
+    /**
+     * Método encargado de generar las columnas de la tabla y configurarlas para recibir
+     * los datos de un JSONObject
+     * @param data Datos para la generación de la tabla.
+     */
+    public void showDataTable(JSONObject data) {
+        schemeDataTable.getItems().clear();
         schemeDataTable.getColumns().clear();
 
-        if (collection == null) {
-            collection = new Hashtable<>();
-        }
+        JSONObject actualScheme = data.getJSONObject("actualScheme");
+        JSONArray attrNames = actualScheme.getJSONArray("attrName");
+        JSONArray attrTypes = actualScheme.getJSONArray("attrType");
+        JSONArray attrSizes = actualScheme.getJSONArray("attrSize");
 
-        // [cedula, nombre, edad]
-        JSONArray attributes = scheme.getJSONArray("attrName");
+        JSONObject joinSchemes = data.getJSONObject("joinSchemes");
 
-        // [[402390083, Paola, 20], [122200589521, Marlon, 20]]
-        ObservableList<JSONArray> items = FXCollections.observableArrayList(collection.values());
+        JSONArray tableItems = data.getJSONArray("tableItems");
 
-        for (int i=0; i<attributes.length(); i++) {
-            TableColumn<JSONArray, String> column = new TableColumn(attributes.getString(i));
-            int finalI = i;
-            column.setCellValueFactory(p -> {
-                return new SimpleStringProperty(p.getValue().getString(finalI));
-            });
+        int joinCount = 0;
+
+        for (int i=0; i<attrNames.length(); i++) {
+            TableColumn<JSONObject, String> column = new TableColumn<>(attrNames.getString(i));
             column.setPrefWidth(150);
+            if (attrTypes.getString(i).equals("join")) {
+                JSONObject joinScheme = joinSchemes.getJSONObject(attrSizes.getString(i));
+                JSONArray joinAttrNames = joinScheme.getJSONArray("attrName");
+
+                for (int j=0; j<joinAttrNames.length(); j++) {
+                    TableColumn<JSONObject, String> subcol = new TableColumn<>(joinAttrNames.getString(j));
+                    subcol.setPrefWidth(125);
+                    int finalJ = j;
+                    int finalJoinCount = joinCount;
+                    subcol.setCellValueFactory(value -> new SimpleStringProperty(
+                            value.getValue()
+                                    .getJSONArray("join")
+                                    .getJSONArray(finalJoinCount)
+                                    .getString(finalJ)));
+                    column.getColumns().add(subcol);
+                }
+                joinCount++;
+            } else {
+                int finalI = i;
+                column.setCellValueFactory(value -> new SimpleStringProperty(
+                        value.getValue()
+                                .getJSONArray("normal")
+                                .getString(finalI)));
+            }
             schemeDataTable.getColumns().add(column);
         }
 
-        schemeDataTable.setItems(items);
-    }
-
-    public void showQueryData(JSONArray queryData) {
-        schemeDataTable.getItems().clear();
-
-        ObservableList<JSONArray> dataItems = FXCollections.observableArrayList();
-
-        for (int i=0; i<queryData.length(); i++) {
-            schemeDataTable.getItems().add(new JSONArray(queryData.getString(i)));
+        for (int i=0; i<tableItems.length(); i++) {
+            schemeDataTable.getItems().add(tableItems.getJSONObject(i));
         }
     }
 
@@ -431,12 +440,11 @@ public class GUI extends Application{
 
         Label messageLabel = new Label(message);
         messageLabel.setTextFill(Color.WHITE);
-//        messageLabel.setStyle("-fx-font-weight: bold;");
         messageLabel.setPadding(new Insets(0, 10, 0, 10));
 
         mainLayout.setBottom(messageContainer);
 
-        messageThread = new Thread(() -> {
+        Thread messageThread = new Thread(() -> {
             try {
                 //Expandir el mensaje
                 double size = 0;
@@ -471,4 +479,5 @@ public class GUI extends Application{
     public void show() {
         launch(GUI.class);
     }
+
 }
