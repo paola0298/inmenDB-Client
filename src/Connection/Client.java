@@ -55,7 +55,7 @@ public class Client {
     private void sendData(String message) {
         try {
             DataOutputStream os = new DataOutputStream(this.clientSocket.getOutputStream());
-            os.writeUTF(message);
+            os.writeUTF(EncodeDecode.cifrarBase64(message));
         } catch (IOException e) {
             System.out.println("Error sending data: " + e.getMessage());
         }
@@ -68,7 +68,7 @@ public class Client {
     private JSONObject getData() {
         try {
             DataInputStream is = new DataInputStream(this.clientSocket.getInputStream());
-            String data = is.readUTF();
+            String data = EncodeDecode.descifrarBase64(is.readUTF());
 //            System.out.println("Data from server: \n" + data);
             return new JSONObject(data);
         } catch (IOException e) {

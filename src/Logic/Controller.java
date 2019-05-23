@@ -443,6 +443,9 @@ public class Controller {
             JSONObject schemeData = new JSONObject(response.getString("scheme"));
             JSONObject joinsData = new JSONObject(response.getString("join"));
 
+            System.out.println("Scheme data:\n" + schemeData);
+            System.out.println("Join data:\n" + joinsData);
+
 //            JSONObject queryData = new JSONObject();
 //
 //            queryData.put("actualScheme", getScheme(
@@ -483,25 +486,6 @@ public class Controller {
         }
     }
 
-    private JSONArray processQueryData(JSONArray searchRecords, JSONArray joinRecords) {
-        JSONArray tableItems = new JSONArray();
-
-        for (int i=0; i<searchRecords.length(); i++) {
-            JSONObject item = new JSONObject();
-            item.put("normal", new JSONArray(searchRecords.getString(i)));
-            if (joinRecords.length() > 0) {
-                item.put("hasJoin", true);
-                item.put("join", new JSONArray(joinRecords.getString(i)));
-                item.put("joinIndex", 0);
-            } else {
-                item.put("hasJoin", false);
-            }
-            tableItems.put(item);
-        }
-
-        return tableItems;
-    }
-
     /**
      * Método que devuelve el nombre del esquema seleccionado actualmente.
      * @return Nombre del esquema seleccionado.
@@ -532,7 +516,4 @@ public class Controller {
 
     }
 
-    private JSONObject getScheme(String schemeName) {
-        return new JSONObject(localSchemes.get(schemeName));
-    }
 }
